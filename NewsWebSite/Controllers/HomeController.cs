@@ -12,6 +12,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Configuration;
+using NewsWebSite.Models.Repository;
 
 namespace NewsWebSite.Controllers
 {
@@ -21,10 +22,11 @@ namespace NewsWebSite.Controllers
 
 
         readonly IRepository repo;
+        readonly IUserRepository user_repo;
 
-
-        public HomeController(IRepository repo)
+        public HomeController(IRepository repo , IUserRepository user_repo)
         {
+            this.user_repo = user_repo;
             this.repo = repo;
         }
 
@@ -87,6 +89,22 @@ namespace NewsWebSite.Controllers
             return RedirectToAction("Article", new { Id = id });
         }
 
+        public ActionResult UserRegistration()
+        {
+            return View("CreateUser");
+        }
+
+        [HttpPost]
+        public ActionResult UserRegistration(CreateUserModels user)
+        {
+            if (ModelState.IsValid)
+            {
+                UserModels userModel = new UserModels { Firstname = user.Firstname, Secondname = user.Secondname, Login=user.Login, Email = user.Email, Password = user.Password };
+                user_repo.Save(userModel);
+                return RedirectToAction("Index");
+            }
+            else return View("Index");
+        }
 
         [HttpGet]
         public ActionResult EditArticle(int id = 0)

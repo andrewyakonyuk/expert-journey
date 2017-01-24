@@ -1,32 +1,29 @@
 ﻿@using NewsWebSite.Models.ViewModel
 @model CreateArticleModel
 @{
-    //Layout = "~/Views/Shared/Lay.cshtml";
-    Layout = null;
+    Layout = "~/Views/Shared/Lay.cshtml";
 }
 @Scripts.Render("~/bundles/jquery")
 @Scripts.Render("~/bundles/jqueryval")
-@using (Html.BeginForm("CreateArticle", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-  
-     <div>
-        @Html.LabelFor(model => Model.Title, new { @class = "DIMAS" })
+<div class="news-create">
+    <header><h3>СОЗДАНИЕ НОВОСТИ</h3></header>
+    @using (Html.BeginForm("CreateArticle", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.LabelFor(model => Model.Title, new { @class = "label-text" })
         @Html.EditorFor(model => model.Title)
         @Html.ValidationMessageFor(model => model.Title)
-    </div>
-    <br />
-    <div>
-        @Html.LabelFor(model => Model.FullDescription)
+
+        @Html.LabelFor(model => Model.FullDescription, new { @class = "label-text" })
         @Html.EditorFor(model => model.FullDescription)
         @Html.ValidationMessageFor(model => model.FullDescription)
-    </div>
-    <br />
-    <div>
-        @Html.LabelFor(model => Model.Image)
-        @Html.TextBoxFor(model => model.Image, new { type = "file", accept = "image/jpeg,image/png,.jpg,.png"})
+
+        @Html.LabelFor(model => Model.Image, new { @class = "label-text" })
+        @Html.TextBoxFor(model => model.Image, new { type = "file", accept = "image/jpeg,image/png,.jpg,.png" })
         @Html.ValidationMessageFor(model => model.Image)
-    </div>
-    <input type="submit" name="sub" value="sub">
-}
+
+        <input type="submit" value="ОПУБЛИКОВАТЬ" name="accept">
+    }
+</div>
+
 
 

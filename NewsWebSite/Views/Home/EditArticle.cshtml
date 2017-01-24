@@ -1,61 +1,52 @@
 ﻿@using NewsWebSite.Models.ViewModel
 @model EditArticleModel
 @{
-    //Layout = "~/Views/Shared/Lay.cshtml";
-    Layout = null;
+    Layout = "~/Views/Shared/Lay.cshtml";
 }
 
 
 @Scripts.Render("~/bundles/jquery")
 @Scripts.Render("~/bundles/jqueryval")
 
-
-@using (Html.BeginForm("EditArticle", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.EditorFor(model => model.Id)
-    <div>
-        @Html.LabelFor(model => Model.Title, new { @class = "DIMAS" })
+<div class="news-create">
+    <header><h3>РЕДАКТИРОВАНИЕ НОВОСТИ</h3></header>
+    @using (Html.BeginForm("EditArticle", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.EditorFor(model => model.Id)
+        @Html.LabelFor(model => Model.Title, new { @class = "label-text" })
         @Html.EditorFor(model => model.Title)
         @Html.ValidationMessageFor(model => model.Title)
-    </div>
-    <br />
-    <div>
-        @Html.LabelFor(model => Model.FullDescription)
+
+        @Html.LabelFor(model => Model.FullDescription, new { @class = "label-text" })
         @Html.EditorFor(model => model.FullDescription)
         @Html.ValidationMessageFor(model => model.FullDescription)
-    </div>
-    <br />
-    <div>
-        @Html.LabelFor(model => Model.Image)
-        @Html.TextBoxFor(model => model.Image, new { type = "file", accept = "image/jpeg,image/png,.jpg,.png", @id = "inputfile" })
+
+        @Html.LabelFor(model => Model.Image, new { @class = "label-text" })
+        @Html.TextBoxFor(model => model.Image, new { type = "file", accept = "image/jpeg,image/png,.jpg,.png" })
         @Html.ValidationMessageFor(model => model.Image)
-    </div>
-    <input type="submit" name="sub" value="sub">
-}
 
+        <input type="submit" value="ОПУБЛИКОВАТЬ" name="accept">
+    }
+</div>
 
-
-@*@Html.ValidationSummary()*@
-
-  @*  <form method="post" enctype="multipart/form-data">
-        <div><img src="~/Content/UserImages/@Model.Id/@Model.Image" class="EditImg" alt="IMG"></div>
-        <table>
-            <input type="hidden" name="Id" value="@Model.Id"  />
-            <tr><td><label for="Title">Заголовок:</label></td><td><input type="text" value="@Model.Title" name="Title" id="Title"></td>
-            @Html.ValidationMessage("Title")
-            </tr>
-            <tr><td colspan="2"><label for="FD" class="label_left">Главный текст новости:<br><textarea name="FullDescription" id="FD" >@Model.FullDescription</textarea></label></td>
-            @Html.ValidationMessage("FullDescription")
-            </tr>
-            <tr>
-                <td><label for="IMG">Загрузить изображение:</label></td>
-                <td><input type="file" name="loadfile" id="IMG" value="@Model.Image" accept="jpg,png,gif"></td>
-                @Html.ValidationMessage("ImageUpload")
-            </tr>
-            <tr><td></td><td><input type="submit" value="Обновить"></td></tr>
-        </table>
-    </form>
-*@
-
-
+    @*@Html.ValidationSummary()*@
+    @*  <form method="post" enctype="multipart/form-data">
+            <div><img src="~/Content/UserImages/@Model.Id/@Model.Image" class="EditImg" alt="IMG"></div>
+            <table>
+                <input type="hidden" name="Id" value="@Model.Id"  />
+                <tr><td><label for="Title">Заголовок:</label></td><td><input type="text" value="@Model.Title" name="Title" id="Title"></td>
+                @Html.ValidationMessage("Title")
+                </tr>
+                <tr><td colspan="2"><label for="FD" class="label_left">Главный текст новости:<br><textarea name="FullDescription" id="FD" >@Model.FullDescription</textarea></label></td>
+                @Html.ValidationMessage("FullDescription")
+                </tr>
+                <tr>
+                    <td><label for="IMG">Загрузить изображение:</label></td>
+                    <td><input type="file" name="loadfile" id="IMG" value="@Model.Image" accept="jpg,png,gif"></td>
+                    @Html.ValidationMessage("ImageUpload")
+                </tr>
+                <tr><td></td><td><input type="submit" value="Обновить"></td></tr>
+            </table>
+        </form>
+    *@
 

@@ -4,22 +4,17 @@
     Layout = "~/Views/Shared/Lay.cshtml";
 }
 
-<div id="news_panel" class="news_panel">
-    @foreach (var a in Model.ArticleList)
-    {
-        <div class="news_item">
-            <h3>
-                <a id="@a.Id" href="@Url.Action("Article", new {Id = a.Id})" onclick="Redirect(@a.Id);">
-                    @a.Title.Substring(0, (a.Title.Length <= 15 ? a.Title.Length : 15))
-                    @*временно, чтобы не ломался сайт при длинных заголовках*@
-                </a>
-                
-            </h3>
-            <span class="time">@a.CreateDate</span>
-            <div><img alt="IMG" class="images" src="~/Content/UserImages/@a.Id/@a.Image"></div>
-        </div>
-    }
-</div>
+@foreach (var a in Model.ArticleList)
+{
+    <div class="news-item">
+        <div class="news-img"><img src="~/Content/UserImages/@a.Id/@a.Image" alt="IMG"></div>
+        <p class="upload-time">@a.LastUpdateDate</p>
+        <h3><a id="@a.Id" href="@Url.Action("Article", new {Id = a.Id})" onclick="Redirect(@a.Id);">@a.Title</a></h3>
+        <a id="@a.Id" href="@Url.Action("Article", new {Id = a.Id})" onclick="Redirect(@a.Id);">ПОДРОБНЕЕ</a>
+    </div>
+}
+
+
 
 <script type="text/javascript">
     // var temp = $('#template').html();
@@ -154,9 +149,38 @@
     }
 </script>
 <script type="text/template" id="template">
-    <div class="news_item">
+    @*<div class="news_item">
         <h3><a id="[Id]" href="Home/Article?Id=[Id]" onclick="Redirect([Id]);">[Title]</a></h3>
         <span class="time">[Date]</span>
         <div><img alt="IMG" class="images" src="~/Content/UserImages/[Id]/[Image]"></div>
+    </div>*@
+    <div class="news-item">
+        <div class="news-img"><img src="~/Content/UserImages/[Id]/[Image]" class="images" alt="IMG"></div>
+        <p class="upload-time">[Date]</p>
+        <h3><a id="[Id]" href="Home/Article?Id=[Id]" onclick="Redirect([Id]);">[Title]</a></h3>
+        <a id="[Id]" href="Home/Article?Id=[Id]" onclick="Redirect([Id]);">ПОДРОБНЕЕ</a>
     </div>
+</script>
+<!-- Строка поиск-->
+<script>
+            $("#search-submit").click(ShowSearh);
+            function ShowSearh(){
+                if(!$("[type=search]").hasClass("hidden"))
+                    {
+                        $("[type=search]").addClass("hidden");
+                        $("nav").removeClass("hidden");
+                    }
+                else {
+                    $("[type=search]").removeClass("hidden");
+                    $("nav").addClass("hidden");
+                }
+            }
+</script>
+
+<!-- Прилипание сайдбара-->
+<script>
+            $(window).on("scroll", function() {
+    if ($(window).scrollTop() > 275){ $('.left').addClass('fixed'); $('.right').addClass('right-content'); $('#to-up').removeClass('hidden');}
+          else {$('.left').removeClass('fixed');$('.right').removeClass('right-content'); $('#to-up').addClass('hidden');}
+    });
 </script>

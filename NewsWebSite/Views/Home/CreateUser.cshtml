@@ -1,0 +1,38 @@
+﻿@model NewsWebSite.Models.ViewModel.CreateUserModels
+@{
+    Layout = "~/Views/Shared/Lay.cshtml";
+}
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+<div class="news-create">
+    <header><h3>РЕГИСТРАЦИЯ ПОЛЬЗВАТЕЛЯ</h3></header>
+    @using (Html.BeginForm("UserRegistration", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.LabelFor(model => Model.Firstname, new { @class = "label-text" })
+        @Html.EditorFor(model => model.Firstname)
+        @Html.ValidationMessageFor(model => model.Firstname)
+
+        @Html.LabelFor(model => Model.Secondname, new { @class = "label-text" })
+        @Html.EditorFor(model => model.Secondname)
+        @Html.ValidationMessageFor(model => model.Secondname)
+
+        @Html.LabelFor(model => Model.Login, new { @class = "label-text" })
+        @Html.EditorFor(model => model.Login)
+        @Html.ValidationMessageFor(model => model.Login)
+
+        @Html.LabelFor(model => Model.Email, new { @class = "label-text" })
+        @Html.TextBoxFor(model => model.Email)
+        @Html.ValidationMessageFor(model => model.Email)
+
+        @Html.LabelFor(model => Model.Password, new { @class = "label-text" })
+        @Html.PasswordFor(model => model.Password)
+        @Html.ValidationMessageFor(model => model.Password)
+
+        @Html.LabelFor(model => Model.PasswordConfirm, new { @class = "label-text" })
+        @Html.PasswordFor(model => model.PasswordConfirm)
+        @Html.ValidationMessageFor(model => model.PasswordConfirm)
+
+        <input type="submit" value="ЗАРЕГИСТРИРОВАТЬСЯ" name="accept">
+    }
+</div>
+
