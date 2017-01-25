@@ -81,6 +81,7 @@ namespace NewsWebSite.App_Start
 
                 return sessionFactory;
             }).InSingletonScope();
+            kernel.Bind<IUserRepository>().To<UserDateBaseRepository>();
         }
     }
 }

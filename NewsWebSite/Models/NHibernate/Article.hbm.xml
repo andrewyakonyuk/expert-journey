@@ -10,5 +10,7 @@
     <property name="Image" />
     <property name="CreateDate" />
     <property name="LastUpdateDate" />
+    <property name="UserId"/>
+    <!--<many-to-one name="User" class="User" column="User.Id" cascade="save-update" />-->
   </class>
 </hibernate-mapping>

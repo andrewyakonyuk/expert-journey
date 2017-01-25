@@ -17,6 +17,7 @@ namespace NewsWebSite.Models
         public virtual string Image { get; set; }
         public virtual DateTime CreateDate { get; set; }
         public virtual DateTime LastUpdateDate { get; set; }
+        public virtual int UserId { get; set; }
 
         public Article(string title, string fulldescription, string image)
         {

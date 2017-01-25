@@ -5,7 +5,7 @@
 }
 
 
-<div class="news_view">
+@*<div class="news_view">
     <h2 class="news_head">@Model.Title</h2>
     <a href="@Url.Action("EditArticle", new { Id = Model.Id })">EDIT</a>
     <img class="FullItemImg" src="~/Content/UserImages/@Model.Id/@Model.Image" alt="SRC" style="max-height: 400px">
@@ -17,4 +17,27 @@
             <p>Updated: @Model.UpdateDate</p>
         }
     </div>
-</div>
+</div>*@
+<article class="news-view">
+    <div class="news-img">
+        <img src="~/Content/UserImages/@Model.Id/@Model.Image" alt="SRC">
+        <span class="upload-date">
+            @{
+                if (Model.UpdateDate != null)
+                {
+                    @Model.UpdateDate
+                }
+                else
+                {@Model.CreateDate}
+            }
+        </span>
+        <a class="edit" href="@Url.Action("EditArticle", new { Id = Model.Id })">РЕДАКТИРОВАТЬ</a>
+        <div class="hide"></div>
+    </div>
+    <header><h3>@Model.Title</h3></header>
+    <p class="news-description">
+        @Model.FullDescription
+    </p>
+</article>
+
+

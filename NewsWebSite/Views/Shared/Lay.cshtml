@@ -1,99 +1,104 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    @Styles.Render("~/Content/main_adaptive.css")
+    @Styles.Render("~/Content/Style.css")
     @Styles.Render("https://fonts.googleapis.com/css?family=EB+Garamond")
     @Styles.Render("https://fonts.googleapis.com/css?family=El+Messiri|Rubik+One")
+    @Styles.Render("https://fonts.googleapis.com/css?family=Scada")
     @Scripts.Render("~/Scripts/jquery-3.1.1.js")
     @Scripts.Render("~/Scripts/jquery.unobtrusive-ajax.js")
     <title>News Portal</title>
 </head>
 <body>
-    <div class="main_page">
-        <div class="header">
-            <div class="top">
-                <form action="" method="get">
-                    <input type="search" name="search_field" id="search_field" placeholder="Input your text">
-                    <input type="submit" value="" name="search_button">
-                </form>
-            </div>
-            <div class="bottom">
-                <div class="logo">
-                    <a href="/Home/Index" class="main-title"><h1>Новостной портал</h1></a>
-                </div>
-                <div class="nav_panel">
-                    <ul>
-                        <li><a href="@Url.Action("CreateArticle")">Create Article</a></li>
-                        <li><a href="">Menu 2</a></li>
-                        <li><a href="">Menu 3</a></li>
-                        <li><a href="">Menu 4</a></li>
-                        <li><a href="">Menu 5</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="main_content">
-            <div class="panel left">
-                <div class="block one">
-                    <h3>Популярные новости</h3>
-                    <div class="news_place">
-                        <div class="news_item">
-                            <img src="tiDNCMp.png" alt="">
-                            <h3><a href="">Заголовок новости</a></h3>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-                        </div>
-                        <div class="news_item">
-                            <img src="tiDNCMp.png" alt="">
-                            <h3><a href="">Заголовок новости</a></h3>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-                        </div>
-                        <div class="news_item">
-                            <img src="tiDNCMp.png" alt="">
-                            <h3><a href="">Заголовок новости</a></h3>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-                        </div>
-                        <div class="news_item">
-                            <img src="tiDNCMp.png" alt="">
-                            <h3><a href="">Заголовок новости</a></h3>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-                        </div>
-                    </div>
-                </div>
-               @* <div class="block two">
-        <h3>Последние новости</h3>
-        <div class="news_place">
-            <div class="news_item">
-                <img src="tiDNCMp.png" alt="">
-                <h3><a href="">Заголовок новости</a></h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-            </div>
-            <div class="news_item">
-                <img src="tiDNCMp.png" alt="">
-                <h3><a href="">Заголовок новости</a></h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-            </div>
-            <div class="news_item">
-                <img src="tiDNCMp.png" alt="">
-                <h3><a href="">Заголовок новости</a></h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-            </div>
-            <div class="news_item">
-                <img src="tiDNCMp.png" alt="">
-                <h3><a href="">Заголовок новости</a></h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, architecto atque autem consectetur doloribus hic, id illum laudantium </p>
-            </div>
-        </div>
-    </div>*@
-            </div>
-            <div class="panel center">
-               @RenderBody()
-            </div>
-            <div class="panel right">
-                <div class="block one"></div>
-            </div>
-        </div>
-        <div class="footer">POWERED BY ME</div>
+    <div id="login-form" class="login-window">
+        <form method="post" action="">
+            <label for="Email">Почтовый адресс</label>
+            <input type="text" name="Email" id="Email">
+            <label for="Password">Пароль</label>
+            <input type="password" name="Password" id="Password">
+            <input type="submit" value="ВОЙТИ">
+            <a href="@Url.Action("UserRegistration")">ЗАРЕГИСТРИРОВАТЬСЯ</a>
+        </form> 
+@*@using (Html.BeginForm("", "", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.Label(ViewBag.Login.Email)
+
+    <input type="submit" value="ВОЙТИ">
+    <a href="@Url.Action("UserRegistration")">ЗАРЕГИСТРИРОВАТЬСЯ</a>
+}*@
     </div>
+    <div id="window-bg" class="bg-container">
+    </div>
+    <div class="main-page">
+        <header>
+            <div id="main" class="logo">
+                <h1><span class="news">НОВОСТНОЙ</span><span class="portal">ПОРТАЛ</span></h1>
+            </div>
+            <nav class="main-menu">
+                <ul>
+                    <li><a href="@Url.Action("Index")">главная</a></li>
+                    <li><a href="@Url.Action("CreateArticle")">создать новость</a></li>
+                    <li><a id="loged-button" href="">войти</a></li>
+                </ul>
+            </nav>
+            <form action="" method="get">
+                <input type="search" class="hidden" name="search-field" placeholder="Введите текст">
+                <input id="search-submit" type="button" value="">
+            </form>
+        </header>
+        <div class="content">
+            <div class="left block">
+                <section class="post">
+                    <header><h3><span>популярные</span></h3></header>
+                    <div class="news-item">
+                        <div class="news-img">
+                            <img src="Images/nastol.com.ua_203349.jpg" alt>
+                        </div>
+                        <span class="upload-time">23.2015</span>
+                        <h3><a href="">BELLS CRISTMAS TREES</a></h3>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-img">
+                            <img src="Images/nastol.com.ua_203349.jpg" alt>
+                        </div>
+                        <span class="upload-time">23.2015</span>
+                        <h3><a href="">BELLS CRISTMAS TREES</a></h3>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-img">
+                            <img src="Images/nastol.com.ua_203349.jpg" alt>
+                        </div>
+                        <span class="upload-time">23.2015</span>
+                        <h3><a href="">BELLS CRISTMAS TREES</a></h3>
+                    </div>
+                </section>
+                <a id="to-up" class="hidden" href="#main">В НАЧАЛО</a>
+            </div>
+            <div class="right block">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    <script>
+            $(document).ready(function(){
+                $("#loged-button").click(function(e){
+                    e.preventDefault();
+                    $("#window-bg").fadeIn(200 , function(){
+                        $("#login-form").css("display","block").animate({opacity:1 , top: "30%"} , 400);
+                    });
+                });
+            });
+            $("#window-bg").click(function(){
+                $("#login-form").animate({opacity:1 , top: "-40%"} , 400 , function(){
+                    $(this).css("display" , "none");
+                    $("#window-bg").fadeOut(200);
+                });
+            });
+    </script>
 </body>
 </html>
+
+
+
