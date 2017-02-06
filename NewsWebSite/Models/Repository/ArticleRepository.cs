@@ -17,6 +17,19 @@ namespace NewsWebSite.Models.Repository
             this.sessionFactory = sessionFactory;
         }
 
+        public void Delete(int articleId)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                using (var t = session.BeginTransaction())
+                {
+                    session.Delete(session.Load<Article>(articleId));
+                    t.Commit();
+                }
+            }
+        }
+
+
         public int Save(Article a)
         {
             using (var session = sessionFactory.OpenSession())
@@ -42,29 +55,37 @@ namespace NewsWebSite.Models.Repository
             }
         }
 
-   
+        public bool IsExist(int id)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                var count = session.CreateCriteria<Article>()
+                    .SetProjection(Projections.RowCount())
+                    .Add(Restrictions.IdEq(id))
+                    .UniqueResult<int>();
+                return count == 1;
+            }
+        }
 
-        public PagedList<DemoArticle> GetDemoList(int starFrom, int count, int lastId, string[] taglist/*, int userId*/)
+        public bool IsAuthor(int articleId, int userId)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                return session.CreateCriteria<Article>()
+                    .SetProjection(Projections.RowCount())
+                    .Add(Restrictions.IdEq(articleId))
+                    .Add(Restrictions.Eq("UserId", userId))
+                    .UniqueResult<int>() == 1;
+            }
+        }
+
+        public PagedList<DemoArticle> GetDemoList(NewsCriteria cr)
         {
             using (var session = sessionFactory.OpenSession())
             {
                 var filter = session.CreateCriteria<Article>();
-                   
-
-                //if (userId > 0)
-                //{
-                //    creteria.Add(Restrictions.Eq("UserId", userId));
-                //}
-                if (taglist != null)
-                {
-                    foreach (var t in taglist)
-                    {
-                        //if (t != "") creteria.Add(Restrictions.Like("Tags", "," + t + ",", MatchMode.Anywhere)); 
-                        //Vadim 
-                    }
-                }
-                if (lastId > 0) filter.Add(Restrictions.Lt("Id", lastId));
-                else filter.SetFirstResult(starFrom);
+                if (cr.LastId > 0) filter.Add(Restrictions.Lt("Id", cr.LastId));
+                else filter.SetFirstResult(cr.StartFrom);
 
                 var results = new PagedList<DemoArticle>();
                 var countCreteria = (ICriteria)filter.Clone();
@@ -73,17 +94,16 @@ namespace NewsWebSite.Models.Repository
                     .Add(Projections.Id(), "Id")
                     .Add(Projections.Property("Title"), "Title")
                     .Add(Projections.Property("Image"), "Image")
-                    .Add(Projections.Property("ShortDescription"), "ShortDescription")
                     .Add(Projections.Property("CreateDate"), "CreateDate")
                     .Add(Projections.Property("LastUpdateDate"), "LastUpdateDate"))
                     .AddOrder(Order.Desc("Id"))
-                    .SetMaxResults(count)
+                    .SetMaxResults(cr.Count)
                     .SetResultTransformer(Transformers.AliasToBean<DemoArticle>())
                     .List<DemoArticle>());
 
                 results.LinesCount = countCreteria.SetProjection(Projections.RowCount()).UniqueResult<int>();
 
-                results.PageCount = (int)Math.Ceiling(results.LinesCount / double.Parse(System.Configuration.ConfigurationManager.AppSettings["NumberOfItemsOnPage"]));
+                results.PageCount = (int)Math.Ceiling(results.LinesCount / (double)cr.Count);
                 return results;
             }
         }
@@ -99,17 +119,15 @@ namespace NewsWebSite.Models.Repository
         }
     }
 
+
+
     public class NewsCriteria
     {
         public int StartFrom { get; set; }
         public int Count { get; set; }
         public int LastId { get; set; }
-        public string[] Tags { get; set; }
-        public int UserId { get; set; }
-
         public NewsCriteria()
         {
-            Tags = new string[0];
             Count = 10;
         }
     }

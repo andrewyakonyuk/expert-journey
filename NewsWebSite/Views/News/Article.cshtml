@@ -1,9 +1,8 @@
-@using NewsWebSite.Models;
+@using NewsWebSite.Models.ViewModel;
 @model ArticleForView
 @{
     Layout = "~/Views/Shared/Lay.cshtml";
 }
-
 <article class="news-view">
     <div class="news-img">
         <img src="@Url.Content("~/Content/UserImages/"+ Model.Id + "/" + Model.Image)" alt="SRC">
@@ -11,27 +10,29 @@
             Created: @Model.CreateDate
             @if (Model.UpdateDate != null)
             {
-                @Html.Raw("<br/>Updated: ") @Model.UpdateDate
+                <text><br />Updated: </text>@Model.UpdateDate
             }
         </span>
         @if (Model.Editable)
             {
-            <a class="edit" href="@Url.Action("EditArticle", new { Id = Model.Id })">РЕДАКТИРОВАТЬ</a>
+            <a class="edit" href="@Url.Action("EditArticle", new { Id = Model.Id })">EDIT</a>
         }
         <div class="hide"></div>
     </div>
-    <header><h3>@Model.Title</h3></header>
+    <header><h3>@Html.Raw(@Model.Title)</h3></header>
     <p class="news-description">
-        @Model.FullDescription
+        @Html.Raw(@Model.FullDescription)
     </p>
-     @TagListHelper.SelectedTagsList(Model.ArticleTags)
+    @TagListHelper.SelectedTagsList(Model.ArticleTags)
 </article>
+
     
+
 
 <div class="commentsBlock">
     <div id="comments" class="comments">
         <div id="loader" class="hidden"></div>
-        
+
     </div>
     <div class="sendBlock hidden" id="sendBlock">
         <textarea name="message" id="message"></textarea>
@@ -39,7 +40,6 @@
     </div>
 </div>
 @section scripts {
-
     @Scripts.Render("~/Scripts/jquery.signalR-2.2.1.min.js")
     @Scripts.Render("~/signalr/hubs")
     <script type="text/javascript">
@@ -118,12 +118,12 @@
                             comments.server.send(@Model.Id, id, textArea.val());
                             textArea.val('');
                             $('.sendBlock.active').addClass('hidden').removeClass('active');
-                          //  $('#sendBlock').addClass('active').removeClass('hidden');
+                            //  $('#sendBlock').addClass('active').removeClass('hidden');
                             $('.showSendBlock.hidden').removeClass('hidden');
                         });
                     });
                 }
-   
+
                 $('#send').on("click", function() {
                     comments.server.send(@Model.Id, 0, $('#message').val());
                     $('#message').val('');
@@ -132,10 +132,9 @@
                     $('.sendBlock.active').addClass('hidden').removeClass('active');
                     $('.showSendBlock.hidden').removeClass('hidden');
                 })
- 
                 $('#loader').addClass("hidden");
                 $('#sendBlock').removeClass("hidden");
-               // $('#sendBlock').addClass("active");
+                // $('#sendBlock').addClass("active");
             });
         }
 
@@ -172,7 +171,7 @@
                 comments.server.send(@Model.Id, id, textArea.val());
                 textArea.val('');
                 $('.sendBlock.active').addClass('hidden').removeClass('active');
-              //  $('#sendBlock').addClass('active').removeClass('hidden');
+                //  $('#sendBlock').addClass('active').removeClass('hidden');
                 $('.showSendBlock.hidden').removeClass('hidden');
             });
         }
@@ -190,17 +189,18 @@
             <p class="commentName">[Name]</p>
             <p class="commentDate">[Date]</p>
             <p class="commentText">[Text]</p>
-            <input type="button" value="Ответить" class="showSendBlock commentsBtn" id="[Id]" />
+            <input type="button" value="Reply" class="showSendBlock commentsBtn" id="[Id]" />
             <div class="sendBlock hidden" id="sendBlock-[Id]">
                 <textarea name="message" id="message-[Id]"></textarea>
                 <input type="button" class="replyBtn commentsBtn" value="Send" id="send-[Id]" />
             </div>
         </div>
     </script>
-     <script>
-    $('select').select2({
-        tags:true
-    });
+
+    <script>
+        $('select').select2({
+            tags:true
+        });
     </script>
-    
+
 }

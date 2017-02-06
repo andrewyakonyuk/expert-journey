@@ -5,7 +5,8 @@
     <id name="Id" type="int">
       <generator class="native" />
     </id>
-    <property name="Text" type="string" />
+    <property name="UserName" />
+    <property name="Text" />
     <property name="ArticleId" />
     <property name="Depth" />
     <property name="ReplyCommentId" />

@@ -26,7 +26,7 @@ namespace NewsWebSite.Controllers
         {
         }
 
-        public AccountController(UserManager<AppUser, int> userManager, SignInManager<AppUser, int> signInManager, IUserRepository repo , ITagRepository tagRepo)
+        public AccountController(UserManager<AppUser, int> userManager, SignInManager<AppUser, int> signInManager, IUserRepository repo, ITagRepository tagRepo)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -47,10 +47,16 @@ namespace NewsWebSite.Controllers
             return View();
         }
 
+        [Authorize]
         public ActionResult Index()
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
-            UserViewModel userView = new UserViewModel { UserName = currentUser.UserName, UserTags = currentUser.Tags ,AllTags=tagRepo.GetAllTags() };
+            UserViewModel userView = new UserViewModel
+            {
+                UserName = currentUser.UserName,
+                UserTags = currentUser.Tags,
+                AllTags = tagRepo.GetAllTags()
+            };
             return View(userView);
         }
 
@@ -60,7 +66,7 @@ namespace NewsWebSite.Controllers
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
             currentUser.Tags.Clear();
-            if(tags==null)
+            if (tags == null)
             {
                 repo.Save(currentUser);
             }
@@ -87,17 +93,17 @@ namespace NewsWebSite.Controllers
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
-            //  var user = new AppUser { UserName = model.Email, Email = model.Email, Password = model.Password };
-            var result = //SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-            await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+            var user = new AppUser { UserName = model.Email, Password = model.Password };
+            var result =  //SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: model.RememberMe);
+           await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
             {
                 case SignInStatus.Success:
                     return RedirectToAction("Index", "News");
                 case SignInStatus.LockedOut:
                     return View("Lockout");
-                //case SignInStatus.RequiresVerification:
-                //    return RedirectToAction("SendCode", new { ReturnUrl = "", RememberMe = model.RememberMe });
+                case SignInStatus.RequiresVerification:
+                    return RedirectToAction("SendCode", new { ReturnUrl = "", RememberMe = model.RememberMe });
                 case SignInStatus.Failure:
                 default:
                     ModelState.AddModelError("", "Invalid login attempt.");
@@ -165,12 +171,8 @@ namespace NewsWebSite.Controllers
         {
             if (ModelState.IsValid)
             {
-                //    if (!repo.IsUserWhithUserNameOrEmailExist(model.UserName, model.Email))
-                //    {
-                //        ModelState.AddModelError("UserName", "Email And Username must be uniq");
-                //        return View(model);
-                //    }
-                var user = new AppUser { UserName = model.Email };//, Email = model.Email };
+
+                var user = new AppUser { UserName = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {

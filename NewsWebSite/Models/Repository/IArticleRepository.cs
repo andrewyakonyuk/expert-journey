@@ -14,41 +14,15 @@ namespace NewsWebSite.Models.Repository
 {
     public interface IArticleRepository
     {
+
         Article GetItem(int id);
         int GetCountOfLines();
-        PagedList<DemoArticle> GetDemoList(int starFrom, int count, int lastId, string[] taglist/*, int userId*/);
+        PagedList<DemoArticle> GetDemoList(NewsCriteria cr);
         int Save(Article article);
+        bool IsAuthor(int articleId, int userId);
+        bool IsExist(int id);
+        void Delete(int articleId);
     }
-
-    /* public class CachedRepository : IRepository
-     {
-         readonly IRepository _realRepo;
-
-         public CachedRepository(IRepository realRepo)
-         {
-             _realRepo = realRepo;
-         }
-
-         public Article GetItem(int id)
-         {
-
-             //check if article exsit in cache
-             var article = _realRepo.GetItem(id);
-
-             var cacheKey = string.Join("::", id, article.LastUpdateDate);
-             //put to cache
-         }
-
-         public PagedList<Article> GetList(int offset = 0, int count = 10)
-         {
-             throw new NotImplementedException();
-         }
-
-         public void Save(Article article)
-         {
-             //remove from cache by key
-         }
-     } */
 
     public class PagedList<T> : List<T>
     {

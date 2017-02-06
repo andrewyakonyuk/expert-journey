@@ -1,18 +1,16 @@
-﻿@using NewsWebSite.Models
+﻿@using NewsWebSite.Models.ViewModel
 @model List<ArticleForView>
 @{
     Layout = "~/Views/Shared/Lay.cshtml";
 }
 
-    @foreach (ArticleForView article in Model)
-    {
-        <div class="news-item" id="@article.Id">
-            <div class="news-img"><img src="@Url.Content("~/Content/UserImages/")@article.Id/@article.Image" alt="IMG"></div>
-            <p class="upload-time">@article.UpdateDate</p>
-            <h3><a id="Title-@article.Id" href="@Url.Action("Article", new { Id = article.Id })" onclick="Redirect(@article.Id);">@article.Title</a></h3>
-            <p class="short">@article.ShortDescription</p>
-            <a id="More-@article.Id" href="@Url.Action("Article", new { Id = article.Id })" onclick="Redirect(@article.Id);">ПОДРОБНЕЕ</a>
-        </div>
-    }
+@foreach (ArticleForView article in Model)
+{
+    <div class="news-item" id="@article.Id">
+        <div class="news-img"><img src="@Url.Content("~/Content/UserImages/")@article.Id/@article.Image" alt="IMG"></div>
+        <p class="upload-time">@article.UpdateDate</p>
+        <h3><a id="Title-@article.Id" href="@Url.Action("Article", new { Id = article.Id })" onclick="Redirect(@article.Id);">@article.Title</a></h3>
+        <a id="More-@article.Id" href="@Url.Action("Article", new { Id = article.Id })" onclick="Redirect(@article.Id);">ПОДРОБНЕЕ</a>
+    </div>
 }
 

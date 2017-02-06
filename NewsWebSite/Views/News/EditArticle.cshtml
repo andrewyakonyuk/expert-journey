@@ -3,22 +3,26 @@
 @{
     Layout = "~/Views/Shared/Lay.cshtml";
 }
-
 <div class="news-create">
     <header><h3>РЕДАКТИРОВАНИЕ НОВОСТИ</h3></header>
-    @using (Html.BeginForm("EditArticle", "News", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("EditArticle", "News", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "accept.disabled=true; return true;" }))
     {
         @Html.EditorFor(model => model.Id)
         @Html.LabelFor(model => model.Title, new { @class = "label-text" })
         @Html.EditorFor(model => model.Title)
         @Html.ValidationMessageFor(model => model.Title)
 
-        @Html.LabelFor(model => model.ShortDescription, new { @class = "label-text" })
-        @Html.EditorFor(model => model.ShortDescription)
-        @Html.ValidationMessageFor(model => model.ShortDescription)
 
         @Html.LabelFor(model => model.FullDescription, new { @class = "label-text" })
         @Html.EditorFor(model => model.FullDescription)
+        <script src="http://js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            bkLib.onDomLoaded(function () {
+                new nicEditor({
+                    buttonList: ['fontSize', 'bold', 'italic', 'underline', 'strikeThrough', 'fontSize', 'fontFamily', 'fontFormat', 'xhtml', 'image']
+                }).panelInstance('FullDescription');
+            });
+        </script>
         @Html.ValidationMessageFor(model => model.FullDescription)
 
         @Html.LabelFor(model => model.Image, new { @class = "label-text" })
@@ -26,23 +30,22 @@
         @Html.TextBoxFor(model => model.Image, new { type = "file", accept = "image/jpeg,image/png,.jpg,.png" })
         @Html.ValidationMessageFor(model => model.Image)
 
-        @Html.LabelFor(model=>model.ArticleTags, new { @class = "label-text" })
-        @TagListHelper.SelectedTagsList(Model.ArticleTags , Model.AllTags)
+        @Html.LabelFor(model => model.ArticleTags, new { @class = "label-text" })
+        @TagListHelper.SelectedTagsList(Model.ArticleTags, Model.AllTags)
 
         <input type="submit" value="СОХРАНИТЬ" name="accept">
         <a href="@Url.Action("Article", new { Id = Model.Id })">ОТМЕНИТЬ</a>
     }
 </div>
 @section scripts {
-<script>
-    $('select').select2({
-        tags:true
-    });
-</script>
+    <script>
+        $('select').select2({
+            tags: true
+        });
+    </script>
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryval")
 }
-
 @*@Html.ValidationSummary()*@
 @*  <form method="post" enctype="multipart/form-data">
         <div><img src="~/Content/UserImages/@Model.Id/@Model.Image" class="EditImg" alt="IMG"></div>
@@ -63,4 +66,3 @@
         </table>
     </form>
 *@
-
