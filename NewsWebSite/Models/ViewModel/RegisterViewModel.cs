@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NewsWebSite.Attributes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -29,5 +30,11 @@ namespace NewsWebSite.Models.ViewModel
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        [Display(Name = "Изображение")]
+        [ValidImage]
+        [AllowedExtensions(new string[] { ".jpg", ".png" })]
+        [DataType(DataType.Upload)]
+        public HttpPostedFileBase Image { get; set; }
     }
 }

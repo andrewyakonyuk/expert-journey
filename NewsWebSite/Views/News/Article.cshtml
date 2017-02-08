@@ -3,40 +3,53 @@
 @{
     Layout = "~/Views/Shared/Lay.cshtml";
 }
-<article class="news-view">
-    <div class="news-img">
-        <img src="@Url.Content("~/Content/UserImages/"+ Model.Id + "/" + Model.Image)" alt="SRC">
-        <span class="upload-date">
-            Created: @Model.CreateDate
-            @if (Model.UpdateDate != null)
-            {
-                <text><br />Updated: </text>@Model.UpdateDate
-            }
-        </span>
-        @if (Model.Editable)
-            {
-            <a class="edit" href="@Url.Action("EditArticle", new { Id = Model.Id })">EDIT</a>
-        }
-        <div class="hide"></div>
+<div class="row">
+    <div class="col s12 m12 l12">
+        <div class="card z-depth-1">
+            <div class="card-image">
+                @if (Model.Image != "Empty")
+                {
+                <img src="@Url.Content("~/Content/ArticlImages/" + Model.Id + "/" + Model.Image)" alt="SRC">
+                }
+                @if (Model.Editable)
+                {
+                    <a class="btn" style="margin-top:15px;margin-left:15px" href="@Url.Action("EditArticle", new { Id = Model.Id })"><i class="material-icons">edit</i></a>
+                    <a class="btn" style="margin-top:15px;margin-left:15px"><i class="material-icons">delete</i></a>
+                }
+                    </div>
+            <div class="card-content">
+                <span class="card-title">@Model.Title</span>
+                <br />
+                <div class="divider"></div>
+                <br />
+                <p>@Model.FullDescription</p><br />
+                <div class="divider"></div><br />
+                @TagListHelper.DisabledModelTagsList(Model.ArticleTags)
+                <div class="divider"></div><br />
+                @if (Model.UpdateDate != null)
+                {
+                <p>@Model.UpdateDate</p>
+                }
+                else
+                {
+                    <p>@Model.CreateDate</p>
+                }
+            </div>
+        </div>
     </div>
-    <header><h3>@Html.Raw(@Model.Title)</h3></header>
-    <p class="news-description">
-        @Html.Raw(@Model.FullDescription)
-    </p>
-    @TagListHelper.SelectedTagsList(Model.ArticleTags)
-</article>
+</div>
 
     
 
 
 <div class="commentsBlock">
-    <div id="comments" class="comments">
+    <div id="comments" class="comments white z-depth-1"  style="padding:20px;">
         <div id="loader" class="hidden"></div>
-
+        <h3 class="center-align">Коментарии</h3>
     </div>
-    <div class="sendBlock hidden" id="sendBlock">
+    <div class="sendBlock hidden white z-depth-1" id="sendBlock" style="margin:20px 0; padding:20px">
         <textarea name="message" id="message"></textarea>
-        <input type="button" value="Send" id="send" />
+        <input type="button" class="waves-effect waves-light btn" value="Send" id="send" />
     </div>
 </div>
 @section scripts {
@@ -185,15 +198,17 @@
 
     </script>
     <script type="text/template" id="template">
-        <div class="comment" id="comment-[Id]">
-            <p class="commentName">[Name]</p>
-            <p class="commentDate">[Date]</p>
+        <div class="comment" id="comment-[Id]" style="padding-left:40px;">
+            <img src="" class="card-image" style="width:50px;height:50px;border-radius:50%;float:left;margin:15px 15px 15px 0px; object-fit:cover;object-position:center"/>
+            <h5 class="commentName">[Name]</h5>
+            <p class="commentDate blue-grey-text" style="margin-bottom:10px;">[Date]</p>
             <p class="commentText">[Text]</p>
-            <input type="button" value="Reply" class="showSendBlock commentsBtn" id="[Id]" />
+            <input type="button" value="Reply" class="showSendBlock commentsBtn waves-effect waves-light btn" id="[Id]" />
             <div class="sendBlock hidden" id="sendBlock-[Id]">
                 <textarea name="message" id="message-[Id]"></textarea>
-                <input type="button" class="replyBtn commentsBtn" value="Send" id="send-[Id]" />
+                <input type="button" class="replyBtn commentsBtn waves-effect waves-light btn" value="Send" id="send-[Id]" />
             </div>
+            <div class="divider" style="margin:10px 0"></div>
         </div>
     </script>
 

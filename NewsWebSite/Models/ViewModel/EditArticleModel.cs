@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.Security.Application;
 
 namespace NewsWebSite.Models.ViewModel
 {
@@ -18,25 +17,16 @@ namespace NewsWebSite.Models.ViewModel
         [Display(Name = "Заголовок статьи")]
         [StringLength(50, ErrorMessage = "Description Max Length is 50")]
 
-        private string title;
+        public string Title { get; set; }
         [Required]
-        [Display(Name = "Заголовок")]
-        [StringLength(50, ErrorMessage = "Description Max Length is 50")]
-        public string Title { get { return title; } set { title = Sanitizer.GetSafeHtmlFragment(value); } }
+        [Display(Name = "Краткое описание статьи")]
+        [StringLength(200, ErrorMessage = "Максимальная длина описания статьи 200 символов")]
+        public string ShortDescription { get; set; }
 
-        /*private string shortdescription;
-        [Required]
-        [Display(Name = "Короткое описание")]
-        [DataType(DataType.MultilineText)]
-        [StringLength(200, ErrorMessage = "Short Description Max Length is 200")]
-        public string ShortDescription { get { return shortdescription; } set { shortdescription = Sanitizer.GetSafeHtmlFragment(value); } }
-        */
-        private string fulldescription;
-        [Required]
         [Display(Name = "Текст статьи")]
         [DataType(DataType.MultilineText)]
-        [StringLength(10000, ErrorMessage = "Description Max Length is 10000")]
-        public string FullDescription { get { return fulldescription; } set { fulldescription = Sanitizer.GetSafeHtmlFragment(value); } }
+        [StringLength(2000, ErrorMessage = "Description Max Length is 2000")]
+        public string FullDescription { get; set; }
 
 
         [Display(Name = "Изображение")]
@@ -55,6 +45,7 @@ namespace NewsWebSite.Models.ViewModel
         {
             Id = a.Id;
             Title = a.Title;
+            ShortDescription = a.ShortDescription;
             FullDescription = a.FullDescription;
             ArticleTags = a.Tags;
             ImagePath = a.Image;

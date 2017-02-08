@@ -11,8 +11,8 @@ namespace NewsWebSite.Models.Repository
         int Save(Tag tag);
         Tag GetTagById(int id);
         Tag GetTagByName(string name);
-        IList<Tag> GetAllTags();
-        IList<Tag> SaveTagsGroup(string[] tags);
-        IList<Tag> GatTagsGroupByNames(string[] tags);
+        IEnumerable<Tag> GetAllTags();
+        IEnumerable<Tag> Save(string[] tags);
+        IEnumerable<Tag> GatTagsByName(string[] tags);
     }
 }
