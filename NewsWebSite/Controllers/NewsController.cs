@@ -14,8 +14,6 @@ using System.Web.Mvc;
 using System.Configuration;
 using Microsoft.AspNet.Identity;
 using NewsWebSite.Models.Repository;
-using NHibernate;
-
 
 namespace NewsWebSite.Controllers
 {
@@ -44,6 +42,9 @@ namespace NewsWebSite.Controllers
 
         #region ForDebug
 
+        
+
+
         [HttpGet]
         public ActionResult CreateLines(int n = 0)
         {
@@ -63,10 +64,23 @@ namespace NewsWebSite.Controllers
         #endregion
 
 
-        public ActionResult Index()
+        public ActionResult Index(bool isUserNews = false, bool isInterestingNews = false)
         {
-         
-            var list = repo.GetDemoList(new NewsCriteria() {StartFrom = 0, Count = NumberOfItemsOnPage, LastId = 0 });
+            var list = new PagedList<DemoArticle>();
+            int userId = 0;
+            AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
+            if (isUserNews == true)
+            {
+                userId = currentUser.Id;
+            }
+            if (isInterestingNews != true)
+            {
+                list = repo.GetDemoList(new ArticleCriteria() { StartFrom = 0, UserId = userId, Count = NumberOfItemsOnPage, LastId = 0 });
+            }
+            else
+            {
+                list = repo.GetArticleByTags(currentUser.Tags, new ArticleCriteria() { StartFrom = 0, UserId = 0, Count = NumberOfItemsOnPage, LastId = 0 });
+            }
             return View(list);
         }
 
@@ -95,48 +109,38 @@ namespace NewsWebSite.Controllers
 
         [HttpPost]
         [Authorize]
-        [ValidateInput(false)]
-        public ActionResult CreateArticle(CreateArticleModel a , string[] tags)
+        public ActionResult CreateArticle(CreateArticleModel a, string[] tags)
         {
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(a);
+            if (tags == null || tags.Length == 0)
             {
-                
-                Article newArticle = new Article(a.Title, a.FullDescription, a.Image.FileName, User.Identity.GetUserId<int>());
-                newArticle.Tags.Clear();
-                IEnumerable<Tag> articleTags = TagsHelper.FormTagList(tags, tagRepo);
-                TagsHelper.SetTagForModel(newArticle, articleTags);
-                var id = repo.Save(newArticle);
+                ModelState.AddModelError("tags", "Tag field required!");
+                return View(a);
+            }
+            Article newArticle = new Article
+            {
+                Title = a.Title,
+                ShortDescription = a.ShortDescription,
+                FullDescription = a.FullDescription,
+                UserId = User.Identity.GetUserId<int>()
+            };
+            if (a.Image != null)
+            {
+                newArticle.Image = a.Image.FileName;
+            }
+            else newArticle.Image = "Empty";
+            newArticle.Tags.Clear();
+            IEnumerable<Tag> articleTags = TagsHelper.CreateTagList(tags, tagRepo);
+            TagsHelper.SetTagForModel(newArticle, articleTags);
+            var id = repo.Save(newArticle);
+            if (newArticle.Image != "Empty")
+            {
                 FileHelper fileHelper = new FileHelper();
-                fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), a.Image, id);
-                if (a.Title.Length > 0 && a.FullDescription.Length > 0)
-                {
-                    return RedirectToAction("Article", new { Id = id });
-                }
-                else ModelState.AddModelError("length", "Поля содержат недопустимые значения!");
+                fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["ArticlImagesFolder"]), a.Image, id);
             }
-            return View(a);
+            return RedirectToAction("Article", new { Id = id });
         }
 
-
-        
-
-        public ActionResult InterestingNews()
-        {
-            AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
-            List<ArticleForView> interestingArticles = new List<ArticleForView>();
-            foreach(Tag tag in currentUser.Tags)
-            {
-                foreach(Article article in tag.Articles)
-                {
-                    if(!interestingArticles.Select(m=>m.Id).Contains(article.Id))
-                    {
-                        interestingArticles.Add(new ArticleForView(article));
-                    }
-                }
-            }
-            return View(interestingArticles);
-        }
 
         [HttpGet]
         [Authorize]
@@ -149,12 +153,11 @@ namespace NewsWebSite.Controllers
             if (article == null || article.UserId != User.Identity.GetUserId<int>()) return HttpNotFound();
             return View(editArticle);
         }
-
+        
 
         [HttpPost]
         [Authorize]
-        [ValidateInput(false)]
-        public ActionResult EditArticle(EditArticleModel edited , string[] tags)
+        public ActionResult EditArticle(EditArticleModel edited , string[] tags, string imageCondition)
         {
             if (!ModelState.IsValid) return View(edited);
             var baseArticle = repo.GetItem(edited.Id);
@@ -162,10 +165,17 @@ namespace NewsWebSite.Controllers
             if (baseArticle == null || baseArticle.UserId != User.Identity.GetUserId<int>()) return HttpNotFound();
 
             var changesExist = false;
+            if (imageCondition == "Empty")
+            {
+                baseArticle.Image = "Empty";
+                changesExist = true;
+            }
+
+            
             if (edited.Image != null)
             {
                 var fileHelper = new FileHelper();
-                var isChanged = fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), edited.Image, baseArticle.Id);
+                var isChanged = fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["ArticlImagesFolder"]), edited.Image, baseArticle.Id);
                 if (isChanged)
                 {
                     baseArticle.Image = edited.Image.FileName;
@@ -177,7 +187,11 @@ namespace NewsWebSite.Controllers
                 baseArticle.Title = edited.Title;
                 changesExist = true;
             }
-          
+            if (baseArticle.ShortDescription != edited.ShortDescription)
+            {
+                baseArticle.ShortDescription = edited.ShortDescription;
+                changesExist = true;
+            }
             if (baseArticle.FullDescription != edited.FullDescription)
             {
                 baseArticle.FullDescription = edited.FullDescription;
@@ -186,45 +200,22 @@ namespace NewsWebSite.Controllers
             baseArticle.Tags.Clear();
             if(tags!=null)
             {
-                IEnumerable<Tag> newTags = TagsHelper.FormTagList(tags, tagRepo);
+                IEnumerable<Tag> newTags = TagsHelper.CreateTagList(tags, tagRepo);
                 TagsHelper.SetTagForModel(baseArticle, newTags);
 		        changesExist = true;
             }
             if (changesExist) repo.Save(baseArticle);
-            if (edited.Title.Length > 0 && edited.FullDescription.Length > 0)
-                return RedirectToAction("Article", new { Id = edited.Id });
-            return View(edited);
+            return RedirectToAction("Article", new { Id = edited.Id });
         }
-
-
-
-        [HttpPost]
-        [Authorize]
-        public ActionResult Delete(int articleId = 0)
-        {
-            if (articleId > 1)
-            {
-                var userId = User.Identity.GetUserId<int>();
-                if (repo.IsAuthor(articleId, userId))
-                {
-                    repo.Delete(articleId);
-                    return RedirectToAction("Index");
-                }
-            }
-            return HttpNotFound();
-        }
-
-
-
 
 
         #region ForAjaxRequests
 
         [HttpPost]
-        public string GetArticles(int page = 1, int n = 1, int lastId = 0)
+        public string GetArticles(int page = 1, int n = 1, int lastId = 0, int userId = 0)
         {
             if (page < 1) return "";
-            var cr = new NewsCriteria() { StartFrom = page * NumberOfItemsOnPage, Count = n * NumberOfItemsOnPage, LastId = lastId };
+            var cr = new ArticleCriteria() { StartFrom = page * NumberOfItemsOnPage, UserId = userId, Count = n * NumberOfItemsOnPage, LastId = lastId };
             var lst = repo.GetDemoList(cr);// as IList<DemoArticle>;
             return JsonConvert.SerializeObject(lst);
         }
@@ -235,7 +226,6 @@ namespace NewsWebSite.Controllers
             var list = commentsRepository.GetList(articleId);
             return JsonConvert.SerializeObject(list);
         }
-
 
         #endregion
     }

@@ -2,70 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    @Styles.Render("~/Content/Styles.css")
+    @Styles.Render("~/Content/Style.css")
     @Styles.Render("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css")
-    @Styles.Render("https://fonts.googleapis.com/css?family=EB+Garamond")
-    @Styles.Render("https://fonts.googleapis.com/css?family=El+Messiri|Rubik+One")
-    @Styles.Render("https://fonts.googleapis.com/css?family=Scada")
+    @Styles.Render("http://fonts.googleapis.com/icon?family=Material+Icons")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    @Styles.Render("~/Content/materialize.min.css")
     <title>News Portal</title>
-</head>
-<body>
-    <div class="main-page">
-        <header>
-            <div id="main" class="logo">
-                <h1><span class="news">НОВОСТНОЙ</span><span class="portal">ПОРТАЛ</span></h1>
-            </div>
-            <nav class="main-menu">
-                <ul>
-                    <li><a href="@Url.Action("Index", "News")">главная</a></li>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <li><a href="@Url.Action("CreateArticle", "News")">создать новость</a></li>
-                        <li><a href="@Url.Action("InterestingNews", "News")">интерестные новости</a></li>
-                        <li><a href="@Url.Action("Index", "Account")">профиль</a></li>
-                        <li><a href="@Url.Action("LogOff", "Account")">выйти (@User.Identity.Name.Split('@')[0])</a></li>
-                    }
-                    else
-                    {
-                        <li><a id="loged-button" href="@Url.Action("LogIn" , "Account")">войти</a></li>
-                    }
-                </ul>
-            </nav>
-        </header>
-        <div class="content">
-            <div class="left block">
-                
-            </div>
-            <div class="right block">
-                @RenderBody()
-            </div>
-        </div>
-    </div>
-
-    @Scripts.Render("~/Scripts/jquery-3.1.1.js")
-    @Scripts.Render("~/Scripts/jquery.unobtrusive-ajax.js")
-
-    <script>
-        $("#search-submit").click(ShowSearh);
-        function ShowSearh() {
-            if (!$("[type=search]").hasClass("hiddenUp")) {
-                $("[type=search]").addClass("hiddenUp");
-                $("nav").removeClass("hidden");
-            }
-            else {
-                $("[type=search]").removeClass("hiddenUp");
-                $("nav").addClass("hidden");
-            }
+    <style>
+        body{
+            background-color:#cfd8dc;
         }
-    </script>
-    <!-- Прилипание сайдбара-->
-    <script>
-        $(window).on("scroll", function () {
-            if ($(window).scrollTop() > 275) { $('.left').addClass('fixed'); $('.right').addClass('right-content'); $('#to-up').removeClass('hiddenUp'); }
-            else { $('.left').removeClass('fixed'); $('.right').removeClass('right-content'); $('#to-up').addClass('hiddenUp'); }
-        });
-    </script>
-    @Scripts.Render("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js")
-    @RenderSection("scripts", required: false)
+        .grid-item {float:left; width:450px; }
+    </style>
+
+
+</head>
+
+<body>
+    <ul id="dropdown1" class="dropdown-content">
+        <li><a href="@Url.Action("Index", "Account")">Профиль</a></li>
+        <li><a href="@Url.Action("CreateArticle", "News")">Создать новость</a></li>
+        <li><a href="@Url.Action("Index", "News", new { isInterestingNews = true })">Интерестные новости</a></li>
+        <li><a href="@Url.Action("Index", "News", new { isUserNews = true })">Мои новости</a></li>
+        <li class="divider"></li>
+        <li><a href="@Url.Action("LogOff", "Account")">Выйти</a></li>
+    </ul>
+    <nav class="blue-grey darken-3">
+        <div class="nav-wrapper">
+            <a href="#!" class="brand-logo">NewsPortal</a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="@Url.Action("Index", "News")">Главная</a></li>
+@if (User.Identity.IsAuthenticated)
+{
+                <li><a class="dropdown-button" href="#!" data-activates="dropdown1">@User.Identity.Name.Split('@')[0]<i class="material-icons right">arrow_drop_down</i></a></li>
+}
+else
+{
+    <li><a id="loged-button" href="@Url.Action("LogIn" , "Account")">Войти</a></li>
+}
+            </ul>
+        </div>
+    </nav>
+    <div class="container col s12 ">
+        @RenderBody()
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        @Scripts.Render("//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js")
+        <script>
+            $(document).ready(function () {
+                $(".button-collapse").sideNav();
+                $(".dropdown-button").dropdown();
+            })
+        </script>
+        @Scripts.Render("~/Scripts/jquery-3.1.1.js")
+        @Scripts.Render("~/Scripts/jquery.unobtrusive-ajax.js")
+        @Scripts.Render("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js")
+        @Scripts.Render("~/Scripts/materialize.min.js")
+        @RenderSection("scripts", required: false)
 </body>
 </html>

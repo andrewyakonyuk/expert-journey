@@ -13,6 +13,7 @@ using NewsWebSite.Models.Default;
 using NewsWebSite.Models.Repository;
 using NewsWebSite.Models.ViewModel;
 using System.Collections.Generic;
+using System.Configuration;
 
 namespace NewsWebSite.Controllers
 {
@@ -26,7 +27,7 @@ namespace NewsWebSite.Controllers
         {
         }
 
-        public AccountController(UserManager<AppUser, int> userManager, SignInManager<AppUser, int> signInManager, IUserRepository repo, ITagRepository tagRepo)
+        public AccountController(UserManager<AppUser, int> userManager, SignInManager<AppUser, int> signInManager, IUserRepository repo , ITagRepository tagRepo)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -47,36 +48,142 @@ namespace NewsWebSite.Controllers
             return View();
         }
 
-        [Authorize]
         public ActionResult Index()
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
-            UserViewModel userView = new UserViewModel
-            {
+            UserViewModel userView = new UserViewModel {
+                Id = currentUser.Id,
                 UserName = currentUser.UserName,
+                ImageName = currentUser.Image,
                 UserTags = currentUser.Tags,
-                AllTags = tagRepo.GetAllTags()
             };
             return View(userView);
         }
 
+
+        [Authorize]
+        public ActionResult EditTags()
+        {
+            AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
+            EditTagsModel editTags = new EditTagsModel {
+                UserTags = currentUser.Tags,
+                AllTags = tagRepo.GetAllTags()
+            };
+            return View(editTags);
+        }
+
         [HttpPost]
         [Authorize]
-        public ActionResult SaveOrUpdateUserTags(string[] tags)
+        public ActionResult EditTags(string[] tags)
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
             currentUser.Tags.Clear();
-            if (tags == null)
+            if(tags==null)
             {
                 repo.Save(currentUser);
             }
             else
             {
-                IEnumerable<Tag> tagsList = TagsHelper.FormTagList(tags, tagRepo);
+                IEnumerable<Tag> tagsList = TagsHelper.CreateTagList(tags, tagRepo);
                 TagsHelper.SetTagForModel(currentUser, tagsList);
                 repo.Save(currentUser);
             }
             return RedirectToAction("Index");
+        }
+
+
+        [Authorize]
+        public async Task<ActionResult> EditPassword()
+        {
+            AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            if(currentUser != null)
+            {
+                EditPasswordModel editPassword = new EditPasswordModel();
+                return View(editPassword);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult> EditPassword(EditPasswordModel editModel)
+        {
+            AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            if(!ModelState.IsValid)
+            {
+                return View(editModel);
+            }
+            IdentityResult validPass = null;
+            if(!string.IsNullOrEmpty(editModel.NewPassword))
+            {
+                if ( await UserManager.CheckPasswordAsync(currentUser, editModel.OldPassword))
+                {
+                    validPass = await UserManager.PasswordValidator.ValidateAsync(editModel.NewPassword);
+                    if (!validPass.Succeeded)
+                    {
+                        AddErrors(validPass);
+                    }
+                    else
+                    {
+                        currentUser.Password = UserManager.PasswordHasher.HashPassword(editModel.NewPassword);
+                        IdentityResult result = await UserManager.UpdateAsync(currentUser);
+                        if (!result.Succeeded)
+                        {
+                            AddErrors(result);
+                        }
+                        else
+                        {
+                            return RedirectToAction("Index");
+                        }
+                    }
+                    
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Введен неверный пароль");
+                }
+            }
+            return View();
+        }
+
+
+        [Authorize]
+        public async Task<ActionResult> EditEmail()
+        {
+            AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            if (currentUser != null)
+            {
+                EditEmailModel editModel = new EditEmailModel { Email = currentUser.UserName };
+                return View(editModel);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<ActionResult> EditEmail(EditEmailModel editModel)
+        {
+            if(!ModelState.IsValid)
+            {
+                return View(editModel);
+            }
+            AppUser user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            user.UserName = editModel.Email;
+            IdentityResult validEmail = await UserManager.UserValidator.ValidateAsync(user);
+            if(!validEmail.Succeeded)
+            {
+                AddErrors(validEmail);
+            }
+            else
+            {
+                IdentityResult result = await UserManager.UpdateAsync(user);
+                if(!result.Succeeded)
+                {
+                    AddErrors(result);
+                }
+                return RedirectToAction("Index");
+            }
+            return View();
         }
 
         //
@@ -93,7 +200,7 @@ namespace NewsWebSite.Controllers
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
-            var user = new AppUser { UserName = model.Email, Password = model.Password };
+              var user = new AppUser { UserName = model.Email, Password = model.Password };
             var result =  //SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: model.RememberMe);
            await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
@@ -171,19 +278,30 @@ namespace NewsWebSite.Controllers
         {
             if (ModelState.IsValid)
             {
-
+           
                 var user = new AppUser { UserName = model.Email };
+                if(model.Image != null)
+                {
+                    user.Image = model.Image.FileName;
+                }
+                else
+                {
+                    user.Image = "Default";
+                }
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
-                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
+                    if (user.Image != "Default")
+                    {
+                        FileHelper fileHelper = new FileHelper();
+                        fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), model.Image, user.Id);
+                    }
+                        // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
                     return RedirectToAction("Index", "News");
                 }
                 AddErrors(result);

@@ -10,21 +10,17 @@ namespace NewsWebSite
     public class TagsHelper
     {
 
-        public static IEnumerable<Tag> FormTagList(string[] tags , ITagRepository tagRepo)
+        public static IEnumerable<Tag> CreateTagList(string[] tags , ITagRepository tagRepo)
         {
             List<string> allTag = tagRepo.GetAllTags().Select(x => x.TagText).ToList();
             List<string> needInSave = tags.ToList().Except(allTag).ToList();
             List<string> areInDB = tags.ToList().Intersect(allTag).ToList();
-            IEnumerable<Tag> loadTags = tagRepo.GatTagsGroupByNames(areInDB.ToArray()).Concat(tagRepo.SaveTagsGroup(needInSave.ToArray()));
+            IEnumerable<Tag> loadTags = tagRepo.GatTagsByName(areInDB.ToArray()).Concat(tagRepo.Save(needInSave.ToArray()));
             return loadTags;
         }
         public static void SetTagForModel(Article article , IEnumerable<Tag> tagList)
         {
-            article.Tags.Clear();
-            foreach (Tag tag in tagList)
-            {
-                article.Tags.Add(tag);
-            }
+            article.Tags = new HashSet<Tag>(tagList);
         }
 
         public static void SetTagForModel(AppUser user , IEnumerable<Tag> tagList)

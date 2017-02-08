@@ -9,24 +9,45 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
+using static NewsWebSite.Models.Repository.ArticleRepository;
 
 namespace NewsWebSite.Models.Repository
 {
     public interface IArticleRepository
     {
-
         Article GetItem(int id);
         int GetCountOfLines();
-        PagedList<DemoArticle> GetDemoList(NewsCriteria cr);
+        PagedList<DemoArticle> GetDemoList(ArticleCriteria cr);
+        PagedList<DemoArticle> GetArticleByTags(IEnumerable<Tag> tags, ArticleCriteria cr);
         int Save(Article article);
-        bool IsAuthor(int articleId, int userId);
         bool IsExist(int id);
-        void Delete(int articleId);
     }
 
     public class PagedList<T> : List<T>
     {
         public int LinesCount { get; set; }
         public int PageCount { get; set; }
+
+        public PagedList()
+        {
+
+        }
+
+        public PagedList(IEnumerable<T> list) : base(list)
+        {
+
+        }
+    }
+
+
+    public class PagedList
+    {
+        public static PagedList<T> Create<T>(IEnumerable<T> list, int totalCount)
+        {
+            return new PagedList<T>(list)
+            {
+                LinesCount = totalCount
+            };
+        }
     }
 }

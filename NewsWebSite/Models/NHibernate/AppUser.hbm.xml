@@ -8,6 +8,7 @@
     <property name="UserName" />
    <!-- <property name="Email" />-->
     <property name="Password" />
+    <property name="Image" />
     <property name="AccessFailedCount" />
     <property name="LockoutEnabled" />
     <property name="lockoutEnd" />
