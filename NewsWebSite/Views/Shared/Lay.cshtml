@@ -1,83 +1,90 @@
-﻿
+﻿@using NewsWebSite.Models.Services
+@using Microsoft.AspNet.Identity
+@{
+    var NotifiCnt = NotificationsService.Instance.GetValue(User.Identity.GetUserId<int>());
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     @Styles.Render("~/Content/Style.css")
     @Styles.Render("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css")
-    @Styles.Render("https://fonts.googleapis.com/css?family=EB+Garamond")
-    @Styles.Render("https://fonts.googleapis.com/css?family=El+Messiri|Rubik+One")
-    @Styles.Render("https://fonts.googleapis.com/css?family=Scada")
-    <title>News Portal</title>
+    @Styles.Render("http://fonts.googleapis.com/icon?family=Material+Icons")
+    @Styles.Render("~/Content/materialize.min.css")
+    <title> News Portal</title>
+    <style>
+        body {
+            background-color: #cfd8dc;
+        }
+
+        .grid-item {
+            float: left;
+            width: 450px;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div class="main-page">
-        <header>
-            <div id="main" class="logo">
-                <h1><span class="news">НОВОСТНОЙ</span><span class="portal">ПОРТАЛ</span></h1>
-            </div>
-            <nav class="main-menu">
-                <ul>
-                    <li><a href="@Url.Action("Index", "News")">главная</a></li>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <li><a href="@Url.Action("CreateArticle", "News")">создать новость</a></li>
-                        <li><a href="@Url.Action("InterestingNews", "News")">интерестные новости</a></li>
-                        <li><a href="@Url.Action("Index", "Account")">профиль</a></li>
-                        <li><a href="@Url.Action("LogOff", "Account")">выйти (@User.Identity.Name.Split('@')[0])</a></li>
-                    }
-                    else
-                    {
-                        <li><a id="loged-button" href="@Url.Action("LogIn" , "Account")">войти</a></li>
-                    }
-                </ul>
-            </nav>
-        </header>
-        <div class="content">
-            @*<div class="left block">
-                    <section class="post">
-                        <header><h3><span>популярные</span></h3></header>
-                        <div class="news-item">
-                            <div class="news-img">
-                                <img src="Images/nastol.com.ua_203349.jpg" alt="">
-                            </div>
-                            <span class="upload-time">23.2015</span>
-                            <h3><a href="">BELLS CRISTMAS TREES</a></h3>
-                        </div>
-                        <div class="news-item">
-                            <div class="news-img">
-                                <img src="Images/nastol.com.ua_203349.jpg" alt="">
-                            </div>
-                            <span class="upload-time">23.2015</span>
-                            <h3><a href="">BELLS CRISTMAS TREES</a></h3>
-                        </div>
-                        <div class="news-item">
-                            <div class="news-img">
-                                <img src="Images/nastol.com.ua_203349.jpg" alt="">
-                            </div>
-                            <span class="upload-time">23.2015</span>
-                            <h3><a href="">BELLS CRISTMAS TREES</a></h3>
-                        </div>
-                    </section>
-                    <a id="to-up" class="hidden" href="#main">В НАЧАЛО</a>
-                </div>*@
-            <div class="right block">
-                @RenderBody()
-            </div>
+    <ul id="dropdown1" class="dropdown-content">
+        <li><a href="@Url.Action("Index", "Account")">Профиль</a></li>
+        <li><a href="@Url.Action("CreateArticle", "News")">Создать новость</a></li>
+        <li><a href="@Url.Action("Index", "News", new { isInterestingNews = true })">Интерестные новости</a></li>
+        <li><a href="@Url.Action("Index", "News", new { isUserNews = true })">Мои новости</a></li>
+        <li class="divider"></li>
+        <li><a href="@Url.Action("LogOff", "Account")">Выйти</a></li>
+    </ul>
+    <ul id="dropdown2" class="dropdown-content">
+        <li><a href="@Url.Action("Index", "Account")">Профиль</a></li>
+        <li><a href="@Url.Action("CreateArticle", "News")">Создать новость</a></li>
+        <li><a href="@Url.Action("Index", "News", new { isInterestingNews = true })">Интерестные новости</a></li>
+        <li><a href="@Url.Action("Index", "News", new { isUserNews = true })">Мои новости</a></li>
+        <li class="divider"></li>
+        <li><a href="@Url.Action("LogOff", "Account")">Выйти</a></li>
+    </ul>
+    <nav class="blue-grey darken-3">
+        <div class="nav-wrapper">
+            <a href="@Url.Action("Index", "News")" class="brand-logo">NewsPortal</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="@Url.Action("Index", "News")">Главная</a></li>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li><a href="@Url.Action("Notifications", "Account")">Мои Ответы(<span id="nCnt">@NotifiCnt</span>)</a></li>
+                    <li><a class="dropdown-button" href="#!" data-activates="dropdown1">@User.Identity.Name.Split('@')[0]<i class="material-icons right">arrow_drop_down</i></a></li>
+                }
+                else
+                {
+                    <li><a id="loged-button" href="@Url.Action("LogIn", "Account", new { returnUrl = Request.RawUrl })">Войти</a></li>
+                }
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a href="@Url.Action("Index", "News")">Главная</a></li>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li><a href="@Url.Action("Notifications", "Account")">Мои Ответы(<span id="nCnt">@NotifiCnt</span>)</a></li>
+                    <li><a class="dropdown-button" href="#!" data-activates="dropdown2">@User.Identity.Name.Split('@')[0]<i class="material-icons right">arrow_drop_down</i></a></li>
+                }
+                else
+                {
+                    <li><a id="loged-button" href="@Url.Action("LogIn", "Account", new { returnUrl = Request.RawUrl })">Войти</a></li>
+                }
+            </ul>
         </div>
+    </nav>
+    <div class="container col s12 ">
+        @RenderBody()
     </div>
-
-    @Scripts.Render("~/Scripts/jquery-3.1.1.js")
-    @Scripts.Render("~/Scripts/jquery.unobtrusive-ajax.js")
-
-    @* <!-- Прилипание сайдбара-->
-        <script>
-            $(window).on("scroll", function () {
-                if ($(window).scrollTop() > 275) { $('.left').addClass('fixed'); $('.right').addClass('right-content'); $('#to-up').removeClass('hidden'); }
-                else { $('.left').removeClass('fixed'); $('.right').removeClass('right-content'); $('#to-up').addClass('hidden'); }
-            });
-        </script>*@
-
+    @Scripts.Render("~/bundle/default")
+    @Scripts.Render("~/signalr/hubs")
+    <script>
+        var connectionStrted = false;
+    </script>
     @RenderSection("scripts", required: false)
+    @Scripts.Render("~/Scripts/HubConnect.js")
 </body>
 </html>

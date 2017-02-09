@@ -1,4 +1,5 @@
-﻿using NHibernate;
+﻿using NewsWebSite.Models.ViewModel;
+using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
 using System;
@@ -42,48 +43,57 @@ namespace NewsWebSite.Models.Repository
             }
         }
 
-   
+        public int GetUserId(int id)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                return session.CreateCriteria<Article>()
+                     .SetProjection(Projections.Property("UserId"))
+                     .Add(Restrictions.IdEq(id))
+                     .UniqueResult<int>();
+            }
+        }
 
-        public PagedList<DemoArticle> GetDemoList(int starFrom, int count, int lastId, string[] taglist/*, int userId*/)
+        public bool IsExist(int id)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                var count = session.CreateCriteria<Article>()
+                    .SetProjection(Projections.RowCount())
+                    .Add(Restrictions.IdEq(id))
+                    .UniqueResult<int>();
+                return count == 1;
+            }
+        }
+
+        public PagedList<DemoArticle> GetDemoList(ArticleCriteria cr)
         {
             using (var session = sessionFactory.OpenSession())
             {
                 var filter = session.CreateCriteria<Article>();
-                   
+                if (cr.LastId > 0) filter.Add(Restrictions.Lt("Id", cr.LastId));
+                else filter.SetFirstResult(cr.StartFrom);
 
-                //if (userId > 0)
-                //{
-                //    creteria.Add(Restrictions.Eq("UserId", userId));
-                //}
-                if (taglist != null)
-                {
-                    foreach (var t in taglist)
-                    {
-                        //if (t != "") creteria.Add(Restrictions.Like("Tags", "," + t + ",", MatchMode.Anywhere)); 
-                        //Vadim 
-                    }
-                }
-                if (lastId > 0) filter.Add(Restrictions.Lt("Id", lastId));
-                else filter.SetFirstResult(starFrom);
+                if (cr.UserId > 0) filter.Add(Restrictions.Eq("UserId", cr.UserId));
 
                 var results = new PagedList<DemoArticle>();
                 var countCreteria = (ICriteria)filter.Clone();
                 results.AddRange(filter
-                     .SetProjection(Projections.ProjectionList()
-                    .Add(Projections.Id(), "Id")
-                    .Add(Projections.Property("Title"), "Title")
-                    .Add(Projections.Property("Image"), "Image")
-                    .Add(Projections.Property("ShortDescription"), "ShortDescription")
-                    .Add(Projections.Property("CreateDate"), "CreateDate")
-                    .Add(Projections.Property("LastUpdateDate"), "LastUpdateDate"))
-                    .AddOrder(Order.Desc("Id"))
-                    .SetMaxResults(count)
-                    .SetResultTransformer(Transformers.AliasToBean<DemoArticle>())
-                    .List<DemoArticle>());
+                .SetProjection(Projections.ProjectionList()
+                .Add(Projections.Id(), "Id")
+                .Add(Projections.Property("Title"), "Title")
+                .Add(Projections.Property("Image"), "Image")
+                .Add(Projections.Property("ShortDescription"), "ShortDescription")
+                .Add(Projections.Property("CreateDate"), "CreateDate")
+                .Add(Projections.Property("LastUpdateDate"), "LastUpdateDate"))
+                .AddOrder(Order.Desc("Id"))
+                .SetMaxResults(cr.Count)
+                .SetResultTransformer(Transformers.AliasToBean<DemoArticle>())
+                .List<DemoArticle>());
 
                 results.LinesCount = countCreteria.SetProjection(Projections.RowCount()).UniqueResult<int>();
 
-                results.PageCount = (int)Math.Ceiling(results.LinesCount / double.Parse(System.Configuration.ConfigurationManager.AppSettings["NumberOfItemsOnPage"]));
+                results.PageCount = (int)Math.Ceiling(results.LinesCount / (double)cr.Count);
                 return results;
             }
         }
@@ -97,20 +107,62 @@ namespace NewsWebSite.Models.Repository
                 return count;
             }
         }
+
+        public PagedList<DemoArticle> GetArticleByTags(IEnumerable<Tag> tags, ArticleCriteria cr)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                ICriteria filter = session.CreateCriteria(typeof(Article));
+                if (cr.LastId > 0) filter.Add(Restrictions.Lt("Id", cr.LastId));
+
+                else filter.SetFirstResult(cr.StartFrom);
+                filter.CreateAlias("Tags", "tag");
+                filter.Add(Expression.In("tag.Id", tags.Select(m=>m.Id).ToArray()));
+                //criteria.SetProjection(Projections.Distinct(Projections.Property("Id")));
+
+                var result = new PagedList<DemoArticle>();
+                var countCreteria = (ICriteria)filter.Clone();
+                result.AddRange(
+                    filter
+                    .SetProjection(Projections.Distinct(Projections.ProjectionList()
+                    .Add(Projections.Id(), "Id")
+                    .Add(Projections.Property("Title"), "Title")
+                    .Add(Projections.Property("Image"), "Image")
+                    .Add(Projections.Property("ShortDescription"), "ShortDescription")
+                    .Add(Projections.Property("CreateDate"), "CreateDate")
+                    .Add(Projections.Property("LastUpdateDate"), "LastUpdateDate")))
+                    .AddOrder(Order.Desc("Id"))
+                    .SetResultTransformer(Transformers.AliasToBean<DemoArticle>())
+                    .List<DemoArticle>());
+                result.LinesCount = countCreteria.SetProjection(Projections.RowCount()).UniqueResult<int>();
+                result.PageCount = (int)Math.Ceiling(result.LinesCount / (double)cr.Count);
+                return result;
+            }
+        }
+
+        public void Delete(int articleId)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                using (var t = session.BeginTransaction())
+                {
+                    session.Delete(session.Load<Article>(articleId));
+                    t.Commit();
+                }
+            }
+        }
     }
 
-    public class NewsCriteria
+    public class ArticleCriteria
     {
         public int StartFrom { get; set; }
         public int Count { get; set; }
         public int LastId { get; set; }
-        public string[] Tags { get; set; }
         public int UserId { get; set; }
-
-        public NewsCriteria()
+        public ArticleCriteria()
         {
-            Tags = new string[0];
             Count = 10;
+            UserId = 0;
         }
     }
 }

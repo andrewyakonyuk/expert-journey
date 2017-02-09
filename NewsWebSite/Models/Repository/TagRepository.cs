@@ -52,7 +52,7 @@ namespace NewsWebSite.Models.Repository
             }
         }
 
-        public IEnumerable<Tag> SaveTagsGroup(string[] tags)
+        public IEnumerable<Tag> Save(string[] tags)
         {
             List<Tag> savedTag = new List<Tag>();
             using (var session = sessionFactory.OpenSession())
@@ -70,7 +70,7 @@ namespace NewsWebSite.Models.Repository
             }
             return savedTag;
         }
-        public IEnumerable<Tag> GatTagsGroupByNames(string[] tags)
+        public IEnumerable<Tag> GatTagsByName(string[] tags)
         {
             List<Tag> loadTags = new List<Tag>();
             using (var session = sessionFactory.OpenSession())

@@ -18,10 +18,12 @@ namespace NewsWebSite.Models.Repository
         }
 
 
-
-        public void Delete(int id)
+        public Comment GetById(int id)
         {
-            throw new NotImplementedException();
+            using (var session = sessionFactory.OpenSession())
+            {
+                return session.Get<Comment>(id);
+            }
         }
 
         public int GetArticleId(int id)
@@ -55,7 +57,9 @@ namespace NewsWebSite.Models.Repository
                 var baseCommentId = session.CreateCriteria<Comment>()
                 .SetProjection(Projections.ProjectionList()
                 .Add(Projections.Property("Depth"), "Depth")
-                .Add(Projections.Property("ArticleId"), "ArticleId"))
+                .Add(Projections.Property("UserId"), "UserId")
+                .Add(Projections.Property("ArticleId"), "ArticleId")
+                .Add(Projections.Property("Deleted"), "Deleted"))
                 .Add(Restrictions.IdEq(id))
                 .SetResultTransformer(Transformers.AliasToBean<CommentInfo>())
                 .UniqueResult<CommentInfo>();
@@ -63,13 +67,6 @@ namespace NewsWebSite.Models.Repository
             }
         }
 
-        public Comment GetItem(int id)
-        {
-            using (var session = sessionFactory.OpenSession())
-            {
-                return session.Get<Comment>(id);
-            }
-        }
 
         public IList<Comment> GetList(int articleId)
         {
@@ -77,24 +74,12 @@ namespace NewsWebSite.Models.Repository
             {
                 var list = session.CreateCriteria<Comment>()
                     .Add(Restrictions.Eq("ArticleId", articleId))
-                      .AddOrder(Order.Asc("Depth"))
-                .AddOrder(Order.Asc("Id"))
+                    .AddOrder(Order.Asc("Depth"))
+                    .AddOrder(Order.Asc("Id"))
                     .List<Comment>();
                 return list;
             }
         }
-
-        //public bool IsExist(int id)
-        //{
-        //    using (var session = sessionFactory.OpenSession())
-        //    {
-        //        var count = session.CreateCriteria<Comment>()
-        //        .SetProjection(Projections.RowCount())
-        //        .Add(Restrictions.IdEq(id))
-        //        .UniqueResult<int>();
-        //        return count == 1;
-        //    }
-        //}
 
         public int Save(Comment comment)
         {

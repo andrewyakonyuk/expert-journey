@@ -8,6 +8,15 @@ namespace NewsWebSite
         // For more information on bundling, visit http://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
+            bundles.Add(new ScriptBundle("~/bundle/default").Include(
+            "~/Scripts/jquery-3.1.1.js",
+            "~/Scripts/jquery.unobtrusive-ajax.js",
+            "~/Scripts/materialize.min.js",
+            "~/Scripts/select2.min.js",
+            "~/Scripts/materialize.min.js",
+            "~/Scripts/SideNav.js",
+            "~/Scripts/jquery.signalR-2.2.1.min.js"));
+
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));
 

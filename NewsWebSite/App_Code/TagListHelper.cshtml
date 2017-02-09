@@ -1,34 +1,44 @@
-﻿@helper SelectedTagsList(ISet<NewsWebSite.Models.Tag> selectedTag , IEnumerable<NewsWebSite.Models.Tag> allTag){
+﻿
+@helper SelectedTagsList(ISet<NewsWebSite.Models.Tag> selectedTag, IEnumerable<NewsWebSite.Models.Tag> allTag)
+{
     <select name="tags" multiple="multiple" style="width:100%">
-        @foreach (NewsWebSite.Models.Tag tag in allTag)
+        @if (allTag != null)
         {
-            if (selectedTag.Select(x => x.Id).Contains(tag.Id))
+            foreach (NewsWebSite.Models.Tag tag in allTag)
             {
-                <option value="@tag.TagText" selected>@tag.TagText</option>
-            }
-            else
-            {
-                <option value="@tag.TagText" >@tag.TagText</option>
+                if (selectedTag.Select(m => m.Id).Contains(tag.Id))
+                {
+                    <option value="@tag.TagText" selected>@tag.TagText</option>
+                }
+                else
+                {
+                    <option value="@tag.TagText">@tag.TagText</option>
+                }
             }
         }
     </select>
 }
-
-@helper SelectedTagsList(ISet<NewsWebSite.Models.Tag> articleTag)
-    {
+@helper DisabledModelTagsList(ISet<NewsWebSite.Models.Tag> articleTag)
+{
     <select name="tags" multiple="multiple" style="width:100%" disabled>
-        @foreach (NewsWebSite.Models.Tag tag in articleTag)
+        @if (articleTag != null)
         {
+            foreach (NewsWebSite.Models.Tag tag in articleTag)
+            {
                 <option value="@tag.TagText" selected>@tag.TagText</option>
+            }
         }
     </select>
 }
-
-@helper TagsList(IEnumerable<NewsWebSite.Models.Tag> allTag){
+@helper TagsList(IEnumerable<NewsWebSite.Models.Tag> allTag)
+{
     <select name="tags" multiple="multiple" style="width:100%">
-        @foreach(NewsWebSite.Models.Tag tag in allTag)
+        @if (allTag != null)
         {
-            <option value="@tag.TagText">@tag.TagText</option>
+            foreach (NewsWebSite.Models.Tag tag in allTag)
+            {
+                <option value="@tag.TagText">@tag.TagText</option>
+            }
         }
-        </select>
-        }
+    </select>
+}

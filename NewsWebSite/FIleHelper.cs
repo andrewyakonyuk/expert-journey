@@ -9,7 +9,6 @@ namespace NewsWebSite
 {
     public class FileHelper
     {
-        //todo: read abouint c# Strea0m
         public bool SaveOrUpdateArticleImage(string folderPath, HttpPostedFileBase image, int id)
         {
             var isChanged = true;

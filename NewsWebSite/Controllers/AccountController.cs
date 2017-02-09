@@ -13,6 +13,8 @@ using NewsWebSite.Models.Default;
 using NewsWebSite.Models.Repository;
 using NewsWebSite.Models.ViewModel;
 using System.Collections.Generic;
+using System.Configuration;
+using NewsWebSite.Models.Services;
 
 namespace NewsWebSite.Controllers
 {
@@ -26,15 +28,20 @@ namespace NewsWebSite.Controllers
         {
         }
 
-        public AccountController(UserManager<AppUser, int> userManager, SignInManager<AppUser, int> signInManager, IUserRepository repo , ITagRepository tagRepo)
+        public AccountController(UserManager<AppUser, int> userManager, SignInManager<AppUser, int> signInManager,
+            IUserRepository repo, ITagRepository tagRepo, INotifiactionsRepository notifiRepo)
         {
             UserManager = userManager;
             SignInManager = signInManager;
             this.repo = repo;
             this.tagRepo = tagRepo;
+            this.notifiRepo = notifiRepo;
+            notifiCountCache = new NotificationsService(notifiRepo);
         }
+        readonly NotificationsService notifiCountCache;
         readonly IUserRepository repo;
         readonly ITagRepository tagRepo;
+        readonly INotifiactionsRepository notifiRepo;
         readonly SignInManager<AppUser, int> SignInManager;
         readonly UserManager<AppUser, int> UserManager;
 
@@ -47,38 +54,13 @@ namespace NewsWebSite.Controllers
             return View();
         }
 
-        public ActionResult Index()
-        {
-            AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
-            UserViewModel userView = new UserViewModel { UserName = currentUser.UserName, UserTags = currentUser.Tags ,AllTags=tagRepo.GetAllTags() };
-            return View(userView);
-        }
 
-        [HttpPost]
-        [Authorize]
-        public ActionResult SaveOrUpdateUserTags(string[] tags)
-        {
-            AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
-            currentUser.Tags.Clear();
-            if(tags==null)
-            {
-                repo.Save(currentUser);
-            }
-            else
-            {
-                IEnumerable<Tag> tagsList = TagsHelper.FormTagList(tags, tagRepo);
-                TagsHelper.SetTagForModel(currentUser, tagsList);
-                repo.Save(currentUser);
-            }
-            return RedirectToAction("Index");
-        }
 
-        //
-        // POST: /Account/Login
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model)
+        public async Task<ActionResult> Login(LoginViewModel model, string ReturnUrl = "")
         {
             if (!ModelState.IsValid)
             {
@@ -87,23 +69,169 @@ namespace NewsWebSite.Controllers
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
-            //  var user = new AppUser { UserName = model.Email, Email = model.Email, Password = model.Password };
-            var result = //SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-            await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+            var user = new AppUser { UserName = model.Email, Password = model.Password };
+            var result =  await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
             {
                 case SignInStatus.Success:
-                    return RedirectToAction("Index", "News");
+                        return Redirect(ReturnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
-                //case SignInStatus.RequiresVerification:
-                //    return RedirectToAction("SendCode", new { ReturnUrl = "", RememberMe = model.RememberMe });
+                case SignInStatus.RequiresVerification:
+                    return RedirectToAction("SendCode", new { ReturnUrl = "", RememberMe = model.RememberMe });
                 case SignInStatus.Failure:
                 default:
                     ModelState.AddModelError("", "Invalid login attempt.");
                     return View(model);
             }
         }
+
+        public ActionResult Index()
+        {
+            AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
+            UserViewModel userView = new UserViewModel
+            {
+                Id = currentUser.Id,
+                UserName = currentUser.UserName,
+                ImageName = currentUser.Image,
+                UserTags = currentUser.Tags,
+            };
+            return View(userView);
+        }
+
+        public ActionResult Notifications()
+        {
+            var lst = notifiRepo.GetList(User.Identity.GetUserId<int>());
+            return View(lst);
+        }
+
+        public ActionResult EditTags()
+        {
+            AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
+            EditTagsModel editTags = new EditTagsModel
+            {
+                UserTags = currentUser.Tags,
+                AllTags = tagRepo.GetAllTags()
+            };
+            return View(editTags);
+        }
+
+        [HttpPost]
+        public ActionResult EditTags(string[] tags)
+        {
+            AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
+            currentUser.Tags.Clear();
+            if (tags == null)
+            {
+                repo.Save(currentUser);
+            }
+            else
+            {
+                IEnumerable<Tag> tagsList = TagsHelper.CreateTagList(tags, tagRepo);
+                TagsHelper.SetTagForModel(currentUser, tagsList);
+                repo.Save(currentUser);
+            }
+            return RedirectToAction("Index");
+        }
+
+
+
+        public async Task<ActionResult> EditPassword()
+        {
+            AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            if (currentUser != null)
+            {
+                EditPasswordModel editPassword = new EditPasswordModel();
+                return View(editPassword);
+            }
+            return RedirectToAction("Index");
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> EditPassword(EditPasswordModel editModel)
+        {
+            AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            if (!ModelState.IsValid)
+            {
+                return View(editModel);
+            }
+            IdentityResult validPass = null;
+            if (!string.IsNullOrEmpty(editModel.NewPassword))
+            {
+                if (await UserManager.CheckPasswordAsync(currentUser, editModel.OldPassword))
+                {
+                    validPass = await UserManager.PasswordValidator.ValidateAsync(editModel.NewPassword);
+                    if (!validPass.Succeeded)
+                    {
+                        AddErrors(validPass);
+                    }
+                    else
+                    {
+                        currentUser.Password = UserManager.PasswordHasher.HashPassword(editModel.NewPassword);
+                        IdentityResult result = await UserManager.UpdateAsync(currentUser);
+                        if (!result.Succeeded)
+                        {
+                            AddErrors(result);
+                        }
+                        else
+                        {
+                            return RedirectToAction("Index");
+                        }
+                    }
+
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Введен неверный пароль");
+                }
+            }
+            return View();
+        }
+
+
+
+        public async Task<ActionResult> EditEmail()
+        {
+            AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            if (currentUser != null)
+            {
+                EditEmailModel editModel = new EditEmailModel { Email = currentUser.UserName };
+                return View(editModel);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+
+        public async Task<ActionResult> EditEmail(EditEmailModel editModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(editModel);
+            }
+            AppUser user = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
+            user.UserName = editModel.Email;
+            IdentityResult validEmail = await UserManager.UserValidator.ValidateAsync(user);
+            if (!validEmail.Succeeded)
+            {
+                AddErrors(validEmail);
+            }
+            else
+            {
+                IdentityResult result = await UserManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    AddErrors(result);
+                }
+                return RedirectToAction("Index");
+            }
+            return View();
+        }
+
+        //
+        // POST: /Account/Login
+
 
         //
         // GET: /Account/VerifyCode
@@ -165,23 +293,30 @@ namespace NewsWebSite.Controllers
         {
             if (ModelState.IsValid)
             {
-                //    if (!repo.IsUserWhithUserNameOrEmailExist(model.UserName, model.Email))
-                //    {
-                //        ModelState.AddModelError("UserName", "Email And Username must be uniq");
-                //        return View(model);
-                //    }
-                var user = new AppUser { UserName = model.Email };//, Email = model.Email };
+
+                var user = new AppUser { UserName = model.Email };
+                if (model.Image != null)
+                {
+                    user.Image = model.Image.FileName;
+                }
+                else
+                {
+                    user.Image = "Default";
+                }
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
+                    if (user.Image != "Default")
+                    {
+                        FileHelper fileHelper = new FileHelper();
+                        fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), model.Image, user.Id);
+                    }
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
                     return RedirectToAction("Index", "News");
                 }
                 AddErrors(result);
@@ -421,25 +556,6 @@ namespace NewsWebSite.Controllers
             return View();
         }
 
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        if (_userManager != null)
-        //        {
-        //            _userManager.Dispose();
-        //            _userManager = null;
-        //        }
-
-        //        if (_signInManager != null)
-        //        {
-        //            _signInManager.Dispose();
-        //            _signInManager = null;
-        //        }
-        //    }
-
-        //    base.Dispose(disposing);
-        //}
 
         #region Helpers
         // Used for XSRF protection when adding external logins

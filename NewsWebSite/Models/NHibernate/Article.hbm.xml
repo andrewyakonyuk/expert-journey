@@ -6,7 +6,7 @@
       <generator class="native" />
     </id>
     <property name="Title" />
-    <property name="FullDescription" type="string"/>
+    <property name="FullDescription" type="string" length="10000"/>
     <property name="ShortDescription" type="string"/>
     <property name="Image" />
     <property name="CreateDate" />
@@ -17,4 +17,5 @@
       <many-to-many class="Tag" column="TagId" />
     </set>
   </class>
+  
 </hibernate-mapping>
