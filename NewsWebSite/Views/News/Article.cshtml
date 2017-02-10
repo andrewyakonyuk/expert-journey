@@ -57,7 +57,7 @@
 @section scripts {
     @Scripts.Render("~/Scripts/ArticlePage.js")
     <script type="text/template" id="template">
-        <div class="comment" id="comment-[Id]" userid="[uId]" style="padding-left: 20px;">
+        <div class="comment" id="comment-[Id]" userid="[uId]" style="padding-left: 8px; border-left: 1px solid #D3D3D3">
             <div class="contentComment">
                 <h5 class="commentName blue-text" id="commentName-[Id]">[Name]</h5>
                 <p class="commentDate blue-grey-text" id="commentDate-[Id]" style="margin-bottom:10px;">[Date]</p>
@@ -67,10 +67,10 @@
             @if (Model.UserId > 0)
             {
                 <div id="buttons-[Id]" class="">
-                    <input type="button" value="Reply" class="showSendBlock commentsBtn aves-effect waves-light btn-flat blue-text" id="[Id]" />
-                    <input type="button" value="Edit" class="commentsBtn aves-effect waves-light btn-flat blue-text [Class] editButton" id="editBtn-[Id]" />
-                    <input type="button" value="Save" class="commentsBtn aves-effect waves-light btn-flat blue-text saveButton hidden" id="SaveBtn-[Id]" />
-                    <input type="button" value="Delete" class="commentsBtn aves-effect waves-light btn-flat [Class] blue-text deleteButton" id="deleteBtn-[Id]" />
+                    <input type="button" value="Reply" class="showSendBlock commentsBtn waves-effect waves-light btn-flat blue-text" id="[Id]" />
+                    <input type="button" value="Edit" class="commentsBtn waves-effect waves-light btn-flat blue-text [Class] editButton" id="editBtn-[Id]" />
+                    <input type="button" value="Save" class="commentsBtn waves-effect waves-light btn-flat blue-text saveButton hidden" id="SaveBtn-[Id]" />
+                    <input type="button" value="Delete" class="commentsBtn waves-effect waves-light btn-flat [Class] blue-text deleteButton" id="deleteBtn-[Id]" />
                     <div class="sendBlock hidden" id="sendBlock-[Id]">
                         <textarea name="message" id="message-[Id]"></textarea>
                         <input type="button" class="replyBtn commentsBtn waves-effect waves-light btn" value="Send" id="send-[Id]" />

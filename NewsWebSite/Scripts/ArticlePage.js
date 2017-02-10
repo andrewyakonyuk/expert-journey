@@ -125,10 +125,6 @@ function TemplateReplace(id, userId, name, message, date, reply) {
     return templ;
 }
 
-function htmlEncode(value) {
-    var encodedValue = $('<div />').text(value).html();
-    return encodedValue;
-}
 
 function ResetDefaults() {
     $('.editor.act').addClass('hidden').removeClass('act');

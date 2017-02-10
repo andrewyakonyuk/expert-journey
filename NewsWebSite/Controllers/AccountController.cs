@@ -50,6 +50,7 @@ namespace NewsWebSite.Controllers
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
+            if (User.Identity.IsAuthenticated) return RedirectToAction("Index", "News");
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }

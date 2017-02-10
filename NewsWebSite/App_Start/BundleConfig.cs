@@ -15,7 +15,8 @@ namespace NewsWebSite
             "~/Scripts/select2.min.js",
             "~/Scripts/materialize.min.js",
             "~/Scripts/SideNav.js",
-            "~/Scripts/jquery.signalR-2.2.1.min.js"));
+            "~/Scripts/jquery.signalR-2.2.1.min.js",
+            "~/Scripts/HtmlEncode.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));

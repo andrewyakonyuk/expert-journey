@@ -15,17 +15,19 @@ namespace NewsWebSite.Models.ViewModel
         [HiddenInput(DisplayValue = false)]
         public int Id { get; set; }
 
-        string _Title;
+        //string _Title;
         [Required]
         [Display(Name = "Заголовок")]
         [StringLength(150, ErrorMessage = "Description Max Length is 150")]
-        public string Title { get { return _Title; } set { _Title = Sanitizer.GetSafeHtmlFragment(value).Replace("&#1084;", "м"); } }
+        public string Title { get; set; }
+        // public string Title { get { return _Title; } set { _Title = Sanitizer.GetSafeHtmlFragment(value).Replace("&#1084;", "м"); } }
 
-        string _ShortDescription;
+        //string _ShortDescription;
         [Required]
         [Display(Name = "Краткое описание статьи")]
         [StringLength(300, ErrorMessage = "Максимальная длина описания статьи 300 символов")]
-        public string ShortDescription { get { return _ShortDescription; } set { _ShortDescription = Sanitizer.GetSafeHtmlFragment(value).Replace("&#1084;", "м"); } }
+        public string ShortDescription { get; set; }
+        //public string ShortDescription { get { return _ShortDescription; } set { _ShortDescription = Sanitizer.GetSafeHtmlFragment(value).Replace("&#1084;", "м"); } }
 
         string _FullDescription;
         [Required]

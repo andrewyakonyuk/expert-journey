@@ -10,5 +10,5 @@ hub.client.notify = function (commentId, fromWho, message, articleId) {
     var number = parseInt($(cntItem).text(), 10);
     number = number + 1;
     cntItem.text(number);
-    Materialize.toast(fromWho + ': ' + message, 5000);
+    Materialize.toast(fromWho + ': ' + htmlEncode(message), 5000);
 }

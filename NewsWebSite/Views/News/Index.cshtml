@@ -24,7 +24,7 @@
                         </div>
                         <div class="card-reveal">
                             <span class="card-title grey-text text-darken-4 truncate">@a.Title<i class="material-icons right">close</i></span>
-                            <p>@a.ShortDescription</p>
+                            <p>@Html.Raw(a.ShortDescription)</p>
                             <div class="divider"></div>
                             <p title="@a.CreateDate">@a.LastUpdateDate.ToString("yyyy-MM-dd H:mm:ss")</p>
                         </div>

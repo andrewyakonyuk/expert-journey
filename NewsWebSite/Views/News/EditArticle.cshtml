@@ -6,8 +6,8 @@
 <div class="row white z-depth-1" style="margin:10px 0;padding:20px;">
     @using (Html.BeginForm("EditArticle", "News", FormMethod.Post, new
     {
-        enctype = "multipart/form-data",
-        onsubmit = "accept.disabled = true; accept.value = 'Loading..'; return true;"
+        enctype = "multipart/form-data"
+        //,onsubmit = "accept.disabled = true; accept.value = 'Loading..'; return true;"
     }))
     {
 

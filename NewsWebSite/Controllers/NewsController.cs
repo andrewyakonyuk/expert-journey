@@ -133,20 +133,20 @@ namespace NewsWebSite.Controllers
         [HttpPost]
         [Authorize]
         [ValidateInput(false)]
-        public ActionResult CreateArticle(CreateArticleModel a, string[] tags)
+        public ActionResult CreateArticle(CreateArticleModel article, string[] tags)
         {
-            if (!ModelState.IsValid) return View(a);
+            if (!ModelState.IsValid) return View(article);
             tags = tags ?? new string[0];
             Article newArticle = new Article
             {
-                Title = a.Title,
-                ShortDescription = a.ShortDescription,
-                FullDescription = a.FullDescription,
+                Title = article.Title,
+                ShortDescription = article.ShortDescription,
+                FullDescription = article.FullDescription,
                 UserId = User.Identity.GetUserId<int>()
             };
-            if (a.Image != null)
+            if (article.Image != null)
             {
-                newArticle.Image = a.Image.FileName;
+                newArticle.Image = article.Image.FileName;
             }
             else newArticle.Image = "Empty";
             newArticle.Tags.Clear();
@@ -156,9 +156,9 @@ namespace NewsWebSite.Controllers
             if (newArticle.Image != "Empty")
             {
                 FileHelper fileHelper = new FileHelper();
-                fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["ArticlImagesFolder"]), a.Image, id);
+                fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["ArticlImagesFolder"]), article.Image, id);
             }
-            return RedirectToAction("Article", new { Title = a.Title, Id = id });
+            return RedirectToAction("Article", new { Title = article.Title, Id = id });
         }
 
 
@@ -181,7 +181,7 @@ namespace NewsWebSite.Controllers
         [ValidateInput(false)]
         public ActionResult EditArticle(EditArticleModel edited, string[] tags, string imageCondition)
         {
-
+           
             if (!ModelState.IsValid) return View(edited);
             var baseArticle = repo.GetItem(edited.Id);
 
