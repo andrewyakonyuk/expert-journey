@@ -9,7 +9,7 @@ namespace NewsWebSite
 {
     public class FileHelper
     {
-        public bool SaveOrUpdateArticleImage(string folderPath, HttpPostedFileBase image, int id)
+        public bool SaveFIle(string folderPath, HttpPostedFileBase image, int id)
         {
             var isChanged = true;
             var fileName = Path.GetFileName(image.FileName);
@@ -28,8 +28,7 @@ namespace NewsWebSite
                     File.Delete(f);
                 }
             }
-            if(isChanged)
-            image.SaveAs(Path.Combine(userIdFolderPath, fileName));
+            if(isChanged) image.SaveAs(Path.Combine(userIdFolderPath, fileName));
             return isChanged; 
         }
     }

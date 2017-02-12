@@ -15,21 +15,19 @@ using NewsWebSite.Models.ViewModel;
 using System.Collections.Generic;
 using System.Configuration;
 using NewsWebSite.Models.Services;
+using System.IO;
 
 namespace NewsWebSite.Controllers
 {
     [Authorize]
     public class AccountController : Controller
     {
-        //   private SignInManager<User, int> _signInManager;
-        //  private UserManager<User, int> _userManager;
-
-        public AccountController()
-        {
-        }
-
-        public AccountController(UserManager<AppUser, int> userManager, SignInManager<AppUser, int> signInManager,
-            IUserRepository repo, ITagRepository tagRepo, INotifiactionsRepository notifiRepo)
+        public AccountController(
+            UserManager<AppUser, int> userManager, 
+            SignInManager<AppUser, int> signInManager,
+            IUserRepository repo, 
+            ITagRepository tagRepo, 
+            INotifiactionsRepository notifiRepo)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -71,11 +69,11 @@ namespace NewsWebSite.Controllers
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
             var user = new AppUser { UserName = model.Email, Password = model.Password };
-            var result =  await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+            var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
             {
                 case SignInStatus.Success:
-                        return Redirect(ReturnUrl);
+                    return Redirect(ReturnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:
@@ -87,6 +85,7 @@ namespace NewsWebSite.Controllers
             }
         }
 
+        [HttpGet]
         public ActionResult Index()
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
@@ -100,12 +99,14 @@ namespace NewsWebSite.Controllers
             return View(userView);
         }
 
+        [HttpGet]
         public ActionResult Notifications()
         {
             var lst = notifiRepo.GetList(User.Identity.GetUserId<int>());
             return View(lst);
         }
 
+        [HttpGet]
         public ActionResult EditTags()
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
@@ -118,6 +119,7 @@ namespace NewsWebSite.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult EditTags(string[] tags)
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
@@ -136,7 +138,7 @@ namespace NewsWebSite.Controllers
         }
 
 
-
+        [HttpGet]
         public async Task<ActionResult> EditPassword()
         {
             AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
@@ -150,6 +152,7 @@ namespace NewsWebSite.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> EditPassword(EditPasswordModel editModel)
         {
             AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
@@ -191,7 +194,7 @@ namespace NewsWebSite.Controllers
         }
 
 
-
+        [HttpGet]
         public async Task<ActionResult> EditEmail()
         {
             AppUser currentUser = await UserManager.FindByIdAsync(User.Identity.GetUserId<int>());
@@ -204,7 +207,7 @@ namespace NewsWebSite.Controllers
         }
 
         [HttpPost]
-
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> EditEmail(EditEmailModel editModel)
         {
             if (!ModelState.IsValid)
@@ -298,7 +301,7 @@ namespace NewsWebSite.Controllers
                 var user = new AppUser { UserName = model.Email };
                 if (model.Image != null)
                 {
-                    user.Image = model.Image.FileName;
+                    user.Image = Path.GetFileName(model.Image.FileName);
                 }
                 else
                 {
@@ -311,7 +314,7 @@ namespace NewsWebSite.Controllers
                     if (user.Image != "Default")
                     {
                         FileHelper fileHelper = new FileHelper();
-                        fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), model.Image, user.Id);
+                        fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), model.Image, user.Id);
                     }
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link

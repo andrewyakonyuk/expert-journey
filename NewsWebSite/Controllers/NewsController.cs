@@ -50,7 +50,22 @@ namespace NewsWebSite.Controllers
         #region ForDebug
 
 
+        [HttpGet]
+        public ActionResult CreateNoImageLines(int n = 0)
+        {
 
+            for (int i = 1; i <= n; i++)
+            {
+                var a = new Article();
+                a.Title = i.ToString();
+                a.FullDescription = a.Title;
+                a.UserId = 11;
+                a.Image = "Empty";
+                repo.Save(a);
+
+            }
+            return Content("ok");
+        }
 
         [HttpGet]
         public ActionResult CreateLines(int n = 0)
@@ -70,15 +85,15 @@ namespace NewsWebSite.Controllers
 
         #endregion
 
-
+        [HttpGet]
         public ActionResult Index(bool isUserNews = false, bool isInterestingNews = false)
         {
             var list = new PagedList<DemoArticle>();
             int userId = 0;
             AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
-            if (isUserNews) userId = currentUser.Id;
             if (!isInterestingNews)
             {
+                if (isUserNews) userId = currentUser.Id;
                 list = repo.GetDemoList(new ArticleCriteria() { StartFrom = 0, UserId = userId, Count = NumberOfItemsOnPage, LastId = 0 });
             }
             else
@@ -133,6 +148,7 @@ namespace NewsWebSite.Controllers
         [HttpPost]
         [Authorize]
         [ValidateInput(false)]
+        [ValidateAntiForgeryToken]
         public ActionResult CreateArticle(CreateArticleModel article, string[] tags)
         {
             if (!ModelState.IsValid) return View(article);
@@ -156,7 +172,7 @@ namespace NewsWebSite.Controllers
             if (newArticle.Image != "Empty")
             {
                 FileHelper fileHelper = new FileHelper();
-                fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["ArticlImagesFolder"]), article.Image, id);
+                fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["ArticleImagesFolder"]), article.Image, id);
             }
             return RedirectToAction("Article", new { Title = article.Title, Id = id });
         }
@@ -179,6 +195,7 @@ namespace NewsWebSite.Controllers
         [HttpPost]
         [Authorize]
         [ValidateInput(false)]
+        [ValidateAntiForgeryToken]
         public ActionResult EditArticle(EditArticleModel edited, string[] tags, string imageCondition)
         {
            
@@ -198,7 +215,7 @@ namespace NewsWebSite.Controllers
             if (edited.Image != null)
             {
                 var fileHelper = new FileHelper();
-                var isChanged = fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["ArticlImagesFolder"]), edited.Image, baseArticle.Id);
+                var isChanged = fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["ArticleImagesFolder"]), edited.Image, baseArticle.Id);
                 if (isChanged)
                 {
                     baseArticle.Image = edited.Image.FileName;

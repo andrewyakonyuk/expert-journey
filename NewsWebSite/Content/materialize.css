@@ -4677,7 +4677,7 @@ small {
 }
 
 .card .card-reveal {
-  padding: 24px;
+  padding: 22px 22px 0 22px;
   position: absolute;
   background-color: #fff;
   width: 100%;

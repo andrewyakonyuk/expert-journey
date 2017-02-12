@@ -6,6 +6,7 @@
 <div class="row " style="margin:10px 0;padding:20px;">
     @using (Html.BeginForm("EditTags", "Account", FormMethod.Post, new
     {
+        @id = "postForm",
         @class = "col l6 m10 s12 white z-depth-1 offset-l3 offset-m1",
         enctype = "multipart/form-data",
         style = "padding:30px;"
@@ -13,6 +14,7 @@
     }))
     {
         <div class="row">
+            @Html.AntiForgeryToken()
             <div class="input-field col s12">
                 @TagListHelper.SelectedTagsList(Model.UserTags, Model.AllTags)
             </div>

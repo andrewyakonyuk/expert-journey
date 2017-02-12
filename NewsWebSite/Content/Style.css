@@ -3,6 +3,9 @@
     padding: 0;
 }
 
+.placeholder {
+    height: 10px;
+}
 
 .notViewed {
     background-color: #DCDCDC;
@@ -16,17 +19,26 @@
     display: flex;
     justify-content: center;
 }
+
 .red {
     background-color: orangered;
 }
 
 #loader {
-    border: 16px solid #f3f3f3; /* Light grey */
-    border-top: 16px solid #3498db; /* Blue */
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
     border-radius: 50%;
+    animation: spin 2s linear infinite;
+    margin: 0;
+    padding: 0;
     width: 120px;
     height: 120px;
-    animation: spin 2s linear infinite;
+}
+
+#loaderBlock {
+    padding: 0;
+    width: 120px;
+    height: 120px;
     margin: 15px auto;
 }
 
@@ -132,10 +144,10 @@ h1 {
     display: none;
     height: 0;
     width: 0;
-    position: fixed;
     visibility: hidden;
     z-index: -1;
     display: none;
+    position: absolute;
 }
 
 
