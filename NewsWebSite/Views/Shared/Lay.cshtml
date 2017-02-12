@@ -8,11 +8,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    @Styles.Render("~/Content/Style.css")
-    @Styles.Render("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css")
-    @Styles.Render("http://fonts.googleapis.com/icon?family=Material+Icons")
+    @*@Styles.Render("~/Content/Style.css")
+    @Styles.Render("~/Content/select2.min.css")
+    @Styles.Render("~/Content/icon.css")
     @Styles.Render("~/Content/materialize.min.css")
+    @Styles.Render("~/Content/selectStyles.css")*@
+    @Styles.Render("~/bundles/defaultStyles")
+   
     <title> News Portal</title>
+   
     <style>
         body {
             background-color: #cfd8dc;
@@ -53,7 +57,7 @@
                 <li><a href="@Url.Action("Index", "News")">Главная</a></li>
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <li><a href="@Url.Action("Notifications", "Account")">Мои Ответы(<span id="nCnt">@NotifiCnt</span>)</a></li>
+                    <li><a href="@Url.Action("Notifications", "Account")">Мои Ответы(<span class="nCnt">@NotifiCnt</span>)</a></li>
                     <li><a class="dropdown-button" href="#!" data-activates="dropdown1">@User.Identity.Name.Split('@')[0]<i class="material-icons right">arrow_drop_down</i></a></li>
                 }
                 else
@@ -66,7 +70,7 @@
 
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <li><a href="@Url.Action("Notifications", "Account")">Мои Ответы(<span id="nCnt">@NotifiCnt</span>)</a></li>
+                    <li><a href="@Url.Action("Notifications", "Account")">Мои Ответы(<span class="nCnt">@NotifiCnt</span>)</a></li>
                     <li><a class="dropdown-button" href="#!" data-activates="dropdown2">@User.Identity.Name.Split('@')[0]<i class="material-icons right">arrow_drop_down</i></a></li>
                 }
                 else
@@ -79,12 +83,11 @@
     <div class="container col s12 ">
         @RenderBody()
     </div>
-    @Scripts.Render("~/bundle/default")
+    @Scripts.Render("~/bundles/default")
     @Scripts.Render("~/signalr/hubs")
-    <script>
-        var connectionStrted = false;
-    </script>
+    <script>var connectionStrted = false;</script>
     @RenderSection("scripts", required: false)
     @Scripts.Render("~/Scripts/HubConnect.js")
+    @Scripts.Render("~/bundles/formPost")
 </body>
 </html>

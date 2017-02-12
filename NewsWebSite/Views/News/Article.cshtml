@@ -43,7 +43,9 @@
 
 <div class="commentsBlock">
     <div id="comments" class="comments white z-depth-1" style="padding:20px;">
-        <div id="loader" class="hidden"></div>
+        <div id="loaderBlock">
+            <div id="loader" class="hidden"></div>
+        </div>
     </div>
     @if (User.Identity.IsAuthenticated)
     {
@@ -55,7 +57,7 @@
 </div>
 
 @section scripts {
-    @Scripts.Render("~/Scripts/ArticlePage.js")
+    @Scripts.Render("~/bundles/articlePage")
     <script type="text/template" id="template">
         <div class="comment" id="comment-[Id]" userid="[uId]" style="padding-left: 8px; border-left: 1px solid #D3D3D3">
             <div class="contentComment">

@@ -8,6 +8,7 @@
 <div class="row " style="margin:10px 0;padding:20px;">
     @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new
     {
+        @id = "postForm",
         @class = "col l6 m10 s12 white z-depth-1 offset-l3 offset-m1",
         role = "form",
         style = "padding:30px;"

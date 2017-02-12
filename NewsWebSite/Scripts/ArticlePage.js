@@ -8,13 +8,14 @@ var MaxCommentLength = $(Data).data('maxlen');
 var ArticleId = $(Data).data('articleid');
 var commentBlockLoaded = false;
 
+var noComments = false;
 $(document).ready(function () {
     $.connection.hub.start().done(function () {
-        if (!commentBlockLoaded && ($("body").height() >= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height())) {
+        if ($(document).height() - 150 <= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height() - 150) {
             LoadComments();
         }
         $(window).scroll(function () {
-            if (!commentBlockLoaded && $(window).scrollTop() >= $(document).height() - $(window).height() - 100) {
+            if (!commentBlockLoaded && $(window).scrollTop() >= $(document).height() - $(window).height() - 150) {
                 LoadComments();
             }
         });
@@ -25,6 +26,7 @@ $(document).ready(function () {
         });
     });
 });
+
 
 function LoadComments() {
     $.ajax({
@@ -40,7 +42,7 @@ function LoadComments() {
             hub.server.connect(ArticleId);
         }
     }).done(function (data) {
-        console.log(data);
+        //   console.log(data);
         if (data.length > 0) {
             $.each(data, function (index, data) {
                 var templ = TemplateReplace(data.Id, data.UserId, data.UserName, data.Text, data.Created.replace('T', ' '));
@@ -57,6 +59,9 @@ function LoadComments() {
                 LoadButtons(data.Id, data.UserId);
             });
         }
+
+        $('#loaderBlock').addClass("hidden");
+
         $('#send').on("click", function () {
             var item = $('#message');
             var text = $(item).val().trim();
@@ -74,8 +79,8 @@ function LoadComments() {
         $('#message').on("click", function () {
             $('.sendBlock.act').addClass('hidden').removeClass('act');
             $('.showSendBlock.hidden').removeClass('hidden');
-        })
-        $('#loader').addClass("hidden");
+        });
+
         $('#sendBlock').removeClass("hidden");
     });
 }

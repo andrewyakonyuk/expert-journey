@@ -467,7 +467,11 @@
     <Content Include="ckeditor\skins\moono-lisa\images\spinner.gif" />
     <Content Include="ckeditor\styles.js" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\icon.css" />
     <Content Include="Content\Images\news-vector.png" />
+    <Content Include="Content\scroll.css" />
+    <Content Include="Content\select2.min.css" />
+    <Content Include="Content\selectStyle.css" />
     <Content Include="Content\UserImages\profile.png" />
     <Content Include="Content\Images\search_img.png" />
     <Content Include="Content\Images\tiDNCMp.png" />
@@ -505,7 +509,9 @@
     <Content Include="ckeditor\samples\toolbarconfigurator\lib\codemirror\LICENSE" />
     <Content Include="ckeditor\skins\moono-lisa\readme.md" />
     <None Include="Properties\PublishProfiles\newssite - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\newswebsitet3 - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\formPost.js" />
     <Content Include="Scripts\HtmlEncode.js" />
     <Content Include="Scripts\HubConnect.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -580,10 +586,11 @@
     <Content Include="Views\Account\EditPassword.cshtml" />
     <Content Include="Views\Account\EditTags.cshtml" />
     <Content Include="Views\Account\Notifications.cshtml" />
+    <Content Include="Scripts\masonry.pkgd.min.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Content\ArticlImages\" />
+    <Folder Include="Content\ArticleImages\" />
     <Folder Include="Views\Profile\" />
   </ItemGroup>
   <ItemGroup>
