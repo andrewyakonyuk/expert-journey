@@ -6,10 +6,12 @@
       <generator class="native" />
     </id>
     <property name="UserName" />
+    <property name="UserId" />
     <property name="Text" />
     <property name="ArticleId" />
     <property name="Depth" />
     <property name="ReplyCommentId" />
     <property name="Created" />
+    <property name="Deleted" />
   </class>
 </hibernate-mapping>

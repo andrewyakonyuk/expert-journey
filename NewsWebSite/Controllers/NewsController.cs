@@ -1,4 +1,4 @@
- ﻿using NewsWebSite.Models.ViewModel;
+using NewsWebSite.Models.ViewModel;
 using NewsWebSite.Models;
 using Newtonsoft.Json;
 using NHibernate.Criterion;
@@ -14,35 +14,58 @@ using System.Web.Mvc;
 using System.Configuration;
 using Microsoft.AspNet.Identity;
 using NewsWebSite.Models.Repository;
-using NHibernate;
-
+using NewsWebSite.Models.Services;
 
 namespace NewsWebSite.Controllers
 {
     public class NewsController : Controller
     {
         readonly int NumberOfItemsOnPage = int.Parse(ConfigurationManager.AppSettings["NumberOfItemsOnPage"]);
-     
+
         readonly IArticleRepository repo;
 
         readonly ICommentsRepository commentsRepository;
-
+        readonly INotifiactionsRepository notificationRepo;
         readonly ITagRepository tagRepo;
         readonly IUserRepository userRepo;
-
-        public NewsController(IArticleRepository repo,IUserRepository userRepo , ITagRepository tagRepo, ICommentsRepository commentsRepository)
-
+        readonly NotificationsService notifiCountCache;
+        public NewsController(
+            IArticleRepository repo,
+            IUserRepository userRepo, 
+            ITagRepository tagRepo,
+            ICommentsRepository commentsRepository,
+            INotifiactionsRepository notifiRepo)
         {
+            notificationRepo = notifiRepo;
+            notifiCountCache = new NotificationsService(notificationRepo);
             this.userRepo = userRepo;
             this.tagRepo = tagRepo;
             this.repo = repo;
             this.commentsRepository = commentsRepository;
         }
 
-        
+
 
 
         #region ForDebug
+
+
+        [HttpGet]
+        public ActionResult CreateNoImageLines(int n = 0)
+        {
+
+            for (int i = 1; i <= n; i++)
+            {
+                var a = new Article();
+                a.Title = i.ToString();
+                a.FullDescription = a.Title;
+                a.UserId = 11;
+                a.Image = "Empty";
+                repo.Save(a);
+
+            }
+            return Content("ok");
+        }
 
         [HttpGet]
         public ActionResult CreateLines(int n = 0)
@@ -55,33 +78,62 @@ namespace NewsWebSite.Controllers
                 a.FullDescription = a.Title;
                 a.UserId = 11;
                 repo.Save(a);
-
+                
             }
             return Content("ok");
         }
 
         #endregion
 
-
-        public ActionResult Index()
+        [HttpGet]
+        public ActionResult Index(bool isUserNews = false, bool isInterestingNews = false)
         {
-         
-            var list = repo.GetDemoList(new NewsCriteria() {StartFrom = 0, Count = NumberOfItemsOnPage, LastId = 0 });
-            return View(list);
+            var list = new PagedList<DemoArticle>();
+            int userId = 0;
+            AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
+            if (!isInterestingNews)
+            {
+                if (isUserNews) userId = currentUser.Id;
+                list = repo.GetDemoList(new ArticleCriteria() { StartFrom = 0, UserId = userId, Count = NumberOfItemsOnPage, LastId = 0 });
+            }
+            else
+            {
+                list = repo.GetArticleByTags(currentUser.Tags, new ArticleCriteria() { StartFrom = 0, UserId = 0, Count = NumberOfItemsOnPage, LastId = 0 });
+            }
+            var model = new ArticleListModel();
+
+            model.UsierId = userId;
+            model.Type = "default";
+            if (isInterestingNews) model.Type = "tags";
+            else if (isUserNews) model.Type = "my";
+            model.ArticleList = list;
+            return View(model);
         }
 
         [HttpGet]
-        public ActionResult Article(int id = 0)
+        public ActionResult Article(int id = 0, int notifiId = 0)
         {
-            if (id > 0)
+            if (id < 1) return HttpNotFound();
+
+            if (notifiId > 0)
             {
-                var article = repo.GetItem(id);
-                var viewArticle = new ArticleForView(article);
+                if (notificationRepo.View(User.Identity.GetUserId<int>(), notifiId))
+                    notifiCountCache.Update(User.Identity.GetUserId<int>(), -1);
+            }
+            var article = repo.GetItem(id);
+            if (article == null) return HttpNotFound();
+            var viewArticle = new ArticleForView(article);
+
+            if (User.Identity.IsAuthenticated)
+            {
                 if (article.UserId == User.Identity.GetUserId<int>())
                     viewArticle.Editable = true;
-                return View(viewArticle);
+                viewArticle.UserId = User.Identity.GetUserId<int>();
             }
-            return HttpNotFound();
+            else viewArticle.UserId = 0;
+            ViewBag.MaxCommentLength = int.Parse(ConfigurationManager.AppSettings["MaxCommentLength"]);
+            return View(viewArticle);
+
         }
 
         [HttpGet]
@@ -96,47 +148,35 @@ namespace NewsWebSite.Controllers
         [HttpPost]
         [Authorize]
         [ValidateInput(false)]
-        public ActionResult CreateArticle(CreateArticleModel a , string[] tags)
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateArticle(CreateArticleModel article, string[] tags)
         {
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(article);
+            tags = tags ?? new string[0];
+            Article newArticle = new Article
             {
-                
-                Article newArticle = new Article(a.Title, a.FullDescription, a.Image.FileName, User.Identity.GetUserId<int>());
-                newArticle.Tags.Clear();
-                IEnumerable<Tag> articleTags = TagsHelper.FormTagList(tags, tagRepo);
-                TagsHelper.SetTagForModel(newArticle, articleTags);
-                var id = repo.Save(newArticle);
+                Title = article.Title,
+                ShortDescription = article.ShortDescription,
+                FullDescription = article.FullDescription,
+                UserId = User.Identity.GetUserId<int>()
+            };
+            if (article.Image != null)
+            {
+                newArticle.Image = article.Image.FileName;
+            }
+            else newArticle.Image = "Empty";
+            newArticle.Tags.Clear();
+            IEnumerable<Tag> articleTags = TagsHelper.CreateTagList(tags, tagRepo);
+            TagsHelper.SetTagForModel(newArticle, articleTags);
+            var id = repo.Save(newArticle);
+            if (newArticle.Image != "Empty")
+            {
                 FileHelper fileHelper = new FileHelper();
-                fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), a.Image, id);
-                if (a.Title.Length > 0 && a.FullDescription.Length > 0)
-                {
-                    return RedirectToAction("Article", new { Id = id });
-                }
-                else ModelState.AddModelError("length", "Поля содержат недопустимые значения!");
+                fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["ArticleImagesFolder"]), article.Image, id);
             }
-            return View(a);
+            return RedirectToAction("Article", new { Title = article.Title, Id = id });
         }
 
-
-        
-
-        public ActionResult InterestingNews()
-        {
-            AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
-            List<ArticleForView> interestingArticles = new List<ArticleForView>();
-            foreach(Tag tag in currentUser.Tags)
-            {
-                foreach(Article article in tag.Articles)
-                {
-                    if(!interestingArticles.Select(m=>m.Id).Contains(article.Id))
-                    {
-                        interestingArticles.Add(new ArticleForView(article));
-                    }
-                }
-            }
-            return View(interestingArticles);
-        }
 
         [HttpGet]
         [Authorize]
@@ -144,6 +184,7 @@ namespace NewsWebSite.Controllers
         {
             if (id < 1) return HttpNotFound();
             var article = repo.GetItem(id);
+            if (article == null) return HttpNotFound();
             EditArticleModel editArticle = new EditArticleModel(article);
             editArticle.AllTags = tagRepo.GetAllTags();
             if (article == null || article.UserId != User.Identity.GetUserId<int>()) return HttpNotFound();
@@ -154,18 +195,27 @@ namespace NewsWebSite.Controllers
         [HttpPost]
         [Authorize]
         [ValidateInput(false)]
-        public ActionResult EditArticle(EditArticleModel edited , string[] tags)
+        [ValidateAntiForgeryToken]
+        public ActionResult EditArticle(EditArticleModel edited, string[] tags, string imageCondition)
         {
+           
             if (!ModelState.IsValid) return View(edited);
             var baseArticle = repo.GetItem(edited.Id);
 
             if (baseArticle == null || baseArticle.UserId != User.Identity.GetUserId<int>()) return HttpNotFound();
 
             var changesExist = false;
+            if (imageCondition == "Empty")
+            {
+                baseArticle.Image = "Empty";
+                changesExist = true;
+            }
+
+
             if (edited.Image != null)
             {
                 var fileHelper = new FileHelper();
-                var isChanged = fileHelper.SaveOrUpdateArticleImage(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), edited.Image, baseArticle.Id);
+                var isChanged = fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["ArticleImagesFolder"]), edited.Image, baseArticle.Id);
                 if (isChanged)
                 {
                     baseArticle.Image = edited.Image.FileName;
@@ -177,55 +227,60 @@ namespace NewsWebSite.Controllers
                 baseArticle.Title = edited.Title;
                 changesExist = true;
             }
-          
+            if (baseArticle.ShortDescription != edited.ShortDescription)
+            {
+                baseArticle.ShortDescription = edited.ShortDescription;
+                changesExist = true;
+            }
             if (baseArticle.FullDescription != edited.FullDescription)
             {
                 baseArticle.FullDescription = edited.FullDescription;
                 changesExist = true;
             }
             baseArticle.Tags.Clear();
-            if(tags!=null)
+            if (tags != null)
             {
-                IEnumerable<Tag> newTags = TagsHelper.FormTagList(tags, tagRepo);
+                IEnumerable<Tag> newTags = TagsHelper.CreateTagList(tags, tagRepo);
                 TagsHelper.SetTagForModel(baseArticle, newTags);
-		        changesExist = true;
+                changesExist = true;
             }
             if (changesExist) repo.Save(baseArticle);
-            if (edited.Title.Length > 0 && edited.FullDescription.Length > 0)
-                return RedirectToAction("Article", new { Id = edited.Id });
-            return View(edited);
+            return RedirectToAction("Article", new { Title = edited.Title, Id = edited.Id });
         }
 
-
-
-        [HttpPost]
         [Authorize]
-        public ActionResult Delete(int articleId = 0)
+        public ActionResult Delete(int id)
         {
-            if (articleId > 1)
+            var authorId = repo.GetUserId(id);
+            if (authorId == User.Identity.GetUserId<int>())
             {
-                var userId = User.Identity.GetUserId<int>();
-                if (repo.IsAuthor(articleId, userId))
-                {
-                    repo.Delete(articleId);
-                    return RedirectToAction("Index");
-                }
+                repo.Delete(id);
             }
-            return HttpNotFound();
+            return RedirectToAction("Index", "News");
         }
-
-
-
-
-
         #region ForAjaxRequests
 
         [HttpPost]
-        public string GetArticles(int page = 1, int n = 1, int lastId = 0)
+        public string GetArticles(int page = 1, int n = 1, int lastId = 0, int userId = 0, string type = "")
         {
             if (page < 1) return "";
-            var cr = new NewsCriteria() { StartFrom = page * NumberOfItemsOnPage, Count = n * NumberOfItemsOnPage, LastId = lastId };
-            var lst = repo.GetDemoList(cr);// as IList<DemoArticle>;
+            var cr = new ArticleCriteria() { StartFrom = page * NumberOfItemsOnPage, UserId = 0, Count = n * NumberOfItemsOnPage, LastId = lastId };
+            if (User.Identity.IsAuthenticated)
+            {
+                var userIdentityId = User.Identity.GetUserId<int>();
+                if (type == "tags")
+                {
+                    cr.UserId = userIdentityId;
+                    var currentUser = userRepo.GetById(userIdentityId);
+                    var tags = currentUser.Tags;
+                    return JsonConvert.SerializeObject(repo.GetArticleByTags(tags, cr));
+                }
+                if (type == "my")
+                {
+                    cr.UserId = userIdentityId;
+                }
+            }
+            var lst = repo.GetDemoList(cr);
             return JsonConvert.SerializeObject(lst);
         }
 
@@ -235,7 +290,6 @@ namespace NewsWebSite.Controllers
             var list = commentsRepository.GetList(articleId);
             return JsonConvert.SerializeObject(list);
         }
-
 
         #endregion
     }

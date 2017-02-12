@@ -1,42 +1,40 @@
-﻿using NewsWebSite.Attributes;
+﻿using Microsoft.Security.Application;
+using NewsWebSite.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.Security.Application;
 
 namespace NewsWebSite.Models.ViewModel
 {
-    public class EditArticleModel
+    public class EditArticleModel : IEquatable<EditArticleModel>
     {
         [Required]
         [HiddenInput(DisplayValue = false)]
         public int Id { get; set; }
 
-        [Display(Name = "Заголовок статьи")]
-        [StringLength(50, ErrorMessage = "Description Max Length is 50")]
-
-        private string title;
+        //string _Title;
         [Required]
         [Display(Name = "Заголовок")]
-        [StringLength(50, ErrorMessage = "Description Max Length is 50")]
-        public string Title { get { return title; } set { title = Sanitizer.GetSafeHtmlFragment(value); } }
+        [StringLength(150, ErrorMessage = "Description Max Length is 150")]
+        public string Title { get; set; }
+        // public string Title { get { return _Title; } set { _Title = Sanitizer.GetSafeHtmlFragment(value).Replace("&#1084;", "м"); } }
 
-        /*private string shortdescription;
+        //string _ShortDescription;
         [Required]
-        [Display(Name = "Короткое описание")]
-        [DataType(DataType.MultilineText)]
-        [StringLength(200, ErrorMessage = "Short Description Max Length is 200")]
-        public string ShortDescription { get { return shortdescription; } set { shortdescription = Sanitizer.GetSafeHtmlFragment(value); } }
-        */
-        private string fulldescription;
+        [Display(Name = "Краткое описание статьи")]
+        [StringLength(250, ErrorMessage = "Максимальная длина описания статьи 250 символов")]
+        public string ShortDescription { get; set; }
+        //public string ShortDescription { get { return _ShortDescription; } set { _ShortDescription = Sanitizer.GetSafeHtmlFragment(value).Replace("&#1084;", "м"); } }
+
+        string _FullDescription;
         [Required]
         [Display(Name = "Текст статьи")]
         [DataType(DataType.MultilineText)]
-        [StringLength(10000, ErrorMessage = "Description Max Length is 10000")]
-        public string FullDescription { get { return fulldescription; } set { fulldescription = Sanitizer.GetSafeHtmlFragment(value); } }
+        [StringLength(20000, ErrorMessage = "Description Max Length is 20000")]
+        public string FullDescription { get { return _FullDescription; } set { _FullDescription = Sanitizer.GetSafeHtmlFragment(value); } }
 
 
         [Display(Name = "Изображение")]
@@ -55,12 +53,32 @@ namespace NewsWebSite.Models.ViewModel
         {
             Id = a.Id;
             Title = a.Title;
+            ShortDescription = a.ShortDescription;
             FullDescription = a.FullDescription;
             ArticleTags = a.Tags;
             ImagePath = a.Image;
         }
+
         public EditArticleModel()
         {
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as EditArticleModel);
+        }
+        public override int GetHashCode()
+        {
+            return this.Id;
+        }
+
+        public bool Equals(EditArticleModel other)
+        {
+            if (other.Title != this.Title) return false;
+            if (other.ShortDescription != this.ShortDescription) return false;
+            if (other.FullDescription != this.FullDescription) return false;
+            if (!this.ArticleTags.SequenceEqual(other.ArticleTags)) return false;
+            return true;
         }
     }
 }

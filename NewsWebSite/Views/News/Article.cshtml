@@ -3,204 +3,89 @@
 @{
     Layout = "~/Views/Shared/Lay.cshtml";
 }
-<article class="news-view">
-    <div class="news-img">
-        <img src="@Url.Content("~/Content/UserImages/"+ Model.Id + "/" + Model.Image)" alt="SRC">
-        <span class="upload-date">
-            Created: @Model.CreateDate
-            @if (Model.UpdateDate != null)
-            {
-                <text><br />Updated: </text>@Model.UpdateDate
-            }
-        </span>
-        @if (Model.Editable)
-            {
-            <a class="edit" href="@Url.Action("EditArticle", new { Id = Model.Id })">EDIT</a>
-        }
-        <div class="hide"></div>
+<article id="articledata" data-userid="@Model.UserId" data-maxlen="@ViewBag.MaxCommentLength" data-articleid="@Model.Id">
+    <div class="row">
+        <div class="col s12 m12 l12">
+            <div class="card z-depth-1">
+                <div class="card-image">
+                    @if (Model.Image != "Empty")
+                    {
+                        <img src="@Url.Content("~/Content/ArticlImages/" + Model.Id + "/" + Model.Image)" alt="SRC">
+                    }
+                    @if (Model.Editable)
+                    {
+                        <a href="@Url.Action("EditArticle", new { Id = Model.Id })" class="btn" style="margin-top:15px;margin-left:15px"><i class="material-icons">edit</i></a>
+                        <a href="@Url.Action("Delete", new { Id = Model.Id })" class="btn" style="margin-top:15px;margin-left:15px"><i class="material-icons">delete</i></a>
+                    }
+                </div>
+                <div class="card-content">
+                    <span class="card-title">@Model.Title</span>
+                    <br />
+                    <div class="divider"></div>
+                    <br />
+                    <p>@Html.Raw(Model.FullDescription)</p><br />
+                    <div class="divider"></div><br />
+                    @TagListHelper.DisabledModelTagsList(Model.ArticleTags)
+                    <div class="divider"></div><br />
+                    @if (Model.UpdateDate != null)
+                    {
+                        <p>@Model.UpdateDate</p>
+                    }
+                    else
+                    {
+                        <p>@Model.CreateDate</p>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
-    <header><h3>@Html.Raw(@Model.Title)</h3></header>
-    <p class="news-description">
-        @Html.Raw(@Model.FullDescription)
-    </p>
-    @TagListHelper.SelectedTagsList(Model.ArticleTags)
 </article>
 
-    
-
-
 <div class="commentsBlock">
-    <div id="comments" class="comments">
-        <div id="loader" class="hidden"></div>
-
+    <div id="comments" class="comments white z-depth-1" style="padding:20px;">
+        <div id="loaderBlock">
+            <div id="loader" class="hidden"></div>
+        </div>
     </div>
-    <div class="sendBlock hidden" id="sendBlock">
-        <textarea name="message" id="message"></textarea>
-        <input type="button" value="Send" id="send" />
-    </div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="sendBlock hidden white z-depth-1" id="sendBlock" style="margin:20px 0; padding:20px">
+            <textarea name="message" id="message"></textarea>
+            <input type="button" class="waves-effect waves-light btn" value="Send" id="send" />
+        </div>
+    }
 </div>
+
 @section scripts {
-    @Scripts.Render("~/Scripts/jquery.signalR-2.2.1.min.js")
-    @Scripts.Render("~/signalr/hubs")
-    <script type="text/javascript">
-        var commentBlockLoaded = false;
-        var comments = $.connection.commentsHub;
-        $(document).ready(function ()
-        {
-            if (!commentBlockLoaded && $(window).height() >= $(document).height())
-            {
-                LoadComments();
-            }
-            $(window).scroll(function()
-            {
-                if(!commentBlockLoaded && $(window).scrollTop() >= $(document).height() - $(window).height() - 250)
-                {
-                    LoadComments();
-                }
-            });
-        });
-
-
-
-        function LoadComments()
-        {
-            $.ajax({
-                url: '/News/GetComments',
-                //              timeout: 3000,
-                method: 'POST',
-                dataType: 'Json',
-                async: true,
-                data: { "articleId": @Model.Id },
-                beforeSend: function() {
-                    commentBlockLoaded = true;
-                    $('#loader').removeClass("hidden");
-                    $.connection.hub.start().done(function () {
-                        comments.server.connect(@Model.Id);
-                    });
-                }
-            }).done(function(data) {
-                console.log(data);
-                if (data.length > 0)
-                {
-
-                    $.each(data, function(index, data) {
-                        var templ = $("#template").html();
-                        templ = templ.split('[Id]').join(htmlEncode(data.Id));
-                        templ = templ.replace('[Name]', data.UserName);
-                        templ = templ.replace('[Text]', data.Text);
-                        templ = templ.replace('[Date]', htmlEncode(data.Created.replace('T',' ')));
-                        if(data.Depth == 0)
-                        {
-                            $('#comments').append(templ);
-                        }
-                        else
-                        {
-                            $('#comment-' + data.ReplyCommentId).append(templ);
-                        }
-
-
-                        $('#' + data.Id).on("click", function ()
-                        {
-                            var replyBtnId = $(this).attr('id');
-                            var sendBlock = $('.sendBlock.active');
-                            sendBlock.addClass('hidden');
-                            sendBlock.removeClass('active');
-                            $('#sendBlock-' + replyBtnId).addClass('active').removeClass('hidden');
-                            $('.showSendBlock.hidden').removeClass('hidden');
-                            $('#' + replyBtnId).addClass('hidden');
-                        });
-
-
-                        $('#send-' + data.Id).on("click", function() {
-                            var id = $(this).attr('id');
-                            id = id.replace('send-','');
-                            var textArea = $('#message-' + id);
-                            comments.server.send(@Model.Id, id, textArea.val());
-                            textArea.val('');
-                            $('.sendBlock.active').addClass('hidden').removeClass('active');
-                            //  $('#sendBlock').addClass('active').removeClass('hidden');
-                            $('.showSendBlock.hidden').removeClass('hidden');
-                        });
-                    });
-                }
-
-                $('#send').on("click", function() {
-                    comments.server.send(@Model.Id, 0, $('#message').val());
-                    $('#message').val('');
-                });
-                $('#message').on("click", function () {
-                    $('.sendBlock.active').addClass('hidden').removeClass('active');
-                    $('.showSendBlock.hidden').removeClass('hidden');
-                })
-                $('#loader').addClass("hidden");
-                $('#sendBlock').removeClass("hidden");
-                // $('#sendBlock').addClass("active");
-            });
-        }
-
-        comments.client.addMessage = function (id,name, message, date, reply) {
-            var templ = $("#template").html();
-            templ = templ.split('[Id]').join(htmlEncode(id));
-            templ = templ.replace('[Name]', htmlEncode(name));
-            templ = templ.replace('[Text]', htmlEncode(message));
-            templ = templ.replace('[Date]', htmlEncode(date.replace('T',' ')));
-            if(reply == 0)
-            {
-                $('#comments').append(templ);
-            }
-            else
-            {
-                $('#comment-' + reply).append(templ);
-            }
-            $('#' + id).on("click", function ()
-            {
-                var replyBtnId = $(this).attr('id');
-                var sendBlock = $('.sendBlock.active');
-                sendBlock.addClass('hidden');
-                sendBlock.removeClass('active');
-                $('#sendBlock-' + replyBtnId).addClass('active').removeClass('hidden');
-                $('.showSendBlock.hidden').removeClass('hidden');
-                $('#' + replyBtnId).addClass('hidden');
-            });
-
-
-            $('#send-' + id).on("click", function() {
-                var id = $(this).attr('id');
-                id = id.replace('send-','');
-                var textArea = $('#message-' + id);
-                comments.server.send(@Model.Id, id, textArea.val());
-                textArea.val('');
-                $('.sendBlock.active').addClass('hidden').removeClass('active');
-                //  $('#sendBlock').addClass('active').removeClass('hidden');
-                $('.showSendBlock.hidden').removeClass('hidden');
-            });
-        }
-
-
-
-        function htmlEncode(value) {
-            var encodedValue = $('<div />').text(value).html();
-            return encodedValue;
-        }
-
-    </script>
+    @Scripts.Render("~/bundles/articlePage")
     <script type="text/template" id="template">
-        <div class="comment" id="comment-[Id]">
-            <p class="commentName">[Name]</p>
-            <p class="commentDate">[Date]</p>
-            <p class="commentText">[Text]</p>
-            <input type="button" value="Reply" class="showSendBlock commentsBtn" id="[Id]" />
-            <div class="sendBlock hidden" id="sendBlock-[Id]">
-                <textarea name="message" id="message-[Id]"></textarea>
-                <input type="button" class="replyBtn commentsBtn" value="Send" id="send-[Id]" />
+        <div class="comment" id="comment-[Id]" userid="[uId]" style="padding-left: 8px; border-left: 1px solid #D3D3D3">
+            <div class="contentComment">
+                <h5 class="commentName blue-text" id="commentName-[Id]">[Name]</h5>
+                <p class="commentDate blue-grey-text" id="commentDate-[Id]" style="margin-bottom:10px;">[Date]</p>
+                <p class="commentText commentContent" id="text-[Id]">[Text]</p>
+                <p class="commentText editor hidden grey lighten-2" id="edit-[Id]" contenteditable="true"></p>
             </div>
+            @if (Model.UserId > 0)
+            {
+                <div id="buttons-[Id]" class="">
+                    <input type="button" value="Reply" class="showSendBlock commentsBtn waves-effect waves-light btn-flat blue-text" id="[Id]" />
+                    <input type="button" value="Edit" class="commentsBtn waves-effect waves-light btn-flat blue-text [Class] editButton" id="editBtn-[Id]" />
+                    <input type="button" value="Save" class="commentsBtn waves-effect waves-light btn-flat blue-text saveButton hidden" id="SaveBtn-[Id]" />
+                    <input type="button" value="Delete" class="commentsBtn waves-effect waves-light btn-flat [Class] blue-text deleteButton" id="deleteBtn-[Id]" />
+                    <div class="sendBlock hidden" id="sendBlock-[Id]">
+                        <textarea name="message" id="message-[Id]"></textarea>
+                        <input type="button" class="replyBtn commentsBtn waves-effect waves-light btn" value="Send" id="send-[Id]" />
+                    </div>
+                </div>
+            }
+            <div class="divider" style="margin:10px 0"></div>
         </div>
     </script>
 
     <script>
         $('select').select2({
-            tags:true
+            tags: true
         });
     </script>
-
 }

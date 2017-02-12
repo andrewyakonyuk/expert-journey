@@ -23,7 +23,7 @@ namespace NewsWebSite.App_Start
 
     public static class NinjectWebCommon
     {
-        private static readonly Bootstrapper bootstrapper = new Bootstrapper();
+        public static readonly Bootstrapper bootstrapper = new Bootstrapper();
 
         /// <summary>
         /// Starts the application
@@ -76,6 +76,7 @@ namespace NewsWebSite.App_Start
             kernel.Bind<IArticleRepository>().To<ArticleRepository>();
             kernel.Bind<IUserRepository>().To<UserRepository>();
             kernel.Bind<ICommentsRepository>().To<CommentsRepository>();
+            kernel.Bind<INotifiactionsRepository>().To<NotifiactionsRepository>();
             kernel.Bind<ITagRepository>().To<TagRepository>();
             kernel.Bind<UserManager<AppUser, int>>().To<UserManager<AppUser, int>>();
             kernel.Bind<SignInManager<AppUser, int>>().To<SignInManager<AppUser, int>>();

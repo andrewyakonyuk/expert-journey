@@ -14,7 +14,7 @@ namespace NewsWebSite.Models
         public virtual int Id { get; set; }
         public virtual string Title { get; set; }
         public virtual string FullDescription { get; set; }
-        //public virtual string ShortDescription { get; set; }
+        public virtual string ShortDescription { get; set; }
         public virtual string Image { get; set; }
         public virtual DateTime CreateDate { get; set; }
         public virtual DateTime LastUpdateDate { get; set; }
@@ -34,11 +34,11 @@ namespace NewsWebSite.Models
         }
 
 
-        public Article(string title,/*string shortdescription,*/ string fulldescription, string image, int userId)
+        public Article(string title,string shortdescription, string fulldescription, string image, int userId)
 
         {
             Title = title;
-            //ShortDescription = shortdescription;
+            ShortDescription = shortdescription;
             FullDescription = fulldescription;
             Image = image;
             UserId = userId;
