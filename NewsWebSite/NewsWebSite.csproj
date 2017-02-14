@@ -476,8 +476,7 @@
     <Content Include="Content\Images\search_img.png" />
     <Content Include="Content\Images\tiDNCMp.png" />
     <Content Include="Content\main_adaptive.css" />
-    <Content Include="Content\materialize.css" />
-    <Content Include="Content\materialize.min.css" />
+    <Content Include="Content\Materialize.css" />
     <Content Include="Content\Style.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />

@@ -65,19 +65,26 @@ namespace NewsWebSite.Hubs
         }
 
 
-        [Authorize]
-        public void Send(int articleId = 0, int replyCommentId = 0, string text = "")
+        //[Authorize]
+        public void Send(int articleId = 0, int replyCommentId = 0, string text = "", string sendId = "")
         {
            text = text.Trim();
-           if(!commentsHelper.ValidateText(text)) return;
-            if (replyCommentId < 0) return;
+            if (replyCommentId < 0 || !commentsHelper.ValidateText(text))
+            {
+                Clients.Caller.Result(0, sendId, "error1", "");
+                return;
+            }
             var commentDepth = 0;
             var userIdentityId = Context.User.Identity.GetUserId<int>();
             var name = Context.User.Identity.Name.Split('@')[0];
             if (replyCommentId != 0)
             {
                 var replyComment = commentsRepository.GetCommentInfo(replyCommentId);
-                if (replyComment == null || replyComment.ArticleId != articleId) return;
+                if (replyComment == null || replyComment.ArticleId != articleId)
+                {
+                    Clients.Caller.Result(0, sendId, "error2", "");
+                    return;
+                }
                 commentDepth = replyComment.Depth + 1;
                 if (userIdentityId != replyComment.UserId)
                 {
@@ -96,7 +103,11 @@ namespace NewsWebSite.Hubs
             else
             {
                 var authorId = articleRepository.GetUserId(articleId);
-                if (authorId == 0) return;
+                if (authorId == 0)
+                {
+                    Clients.Caller.Result(0, sendId, "error3", "");
+                    return;
+                }
                 if (authorId != userIdentityId)
                 {
                     Clients.Group("user-" + authorId.ToString()).Notify(0, name, text, articleId);
@@ -121,7 +132,8 @@ namespace NewsWebSite.Hubs
             comment.ReplyCommentId = replyCommentId;
             comment.Deleted = false;
             var id = commentsRepository.Save(comment);
-            Clients.Group("article-" + articleId.ToString()).addMessage(id, userIdentityId, comment.UserName, comment.Text, comment.Created.ToString("yyyy-MM-dd HH:mm:ss"), replyCommentId);
+            Clients.OthersInGroup("article-" + articleId).addMessage(id, userIdentityId, comment.UserName, comment.Text, comment.Created.ToString("yyyy-MM-dd HH:mm:ss"), replyCommentId);
+            Clients.Caller.Result(id, sendId, "ok", comment.Created.ToString("yyyy-MM-dd HH:mm:ss"));
 
         }
 
@@ -129,7 +141,7 @@ namespace NewsWebSite.Hubs
         {
             var identity = Context.User.Identity;
             var id = Context.ConnectionId;
-            if (articleId > 0) Groups.Add(id, "article-" + articleId.ToString());
+            if (articleId > 0) Groups.Add(id, "article-" + articleId);
         }
 
         public override Task OnConnected()

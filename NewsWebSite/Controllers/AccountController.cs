@@ -59,7 +59,7 @@ namespace NewsWebSite.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model, string ReturnUrl = "")
+        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl = "")
         {
             if (!ModelState.IsValid)
             {
@@ -73,7 +73,10 @@ namespace NewsWebSite.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    return Redirect(ReturnUrl);
+                    {
+                        if (string.IsNullOrEmpty(returnUrl) || returnUrl == "/") return RedirectToAction("Index", "News");
+                        return Redirect(returnUrl);
+                    }
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:
@@ -285,6 +288,7 @@ namespace NewsWebSite.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
+            if (User.Identity.IsAuthenticated) return RedirectToAction("Index", "News");
             return View();
         }
 

@@ -80,12 +80,12 @@ $(document).ready(function () {
     //console.log("window: " + $(window).height());
     CallAdaptive();
     if (startFrom < PageCnt) {
-        if ($(document).height() - 200 <= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height() - 200) {
+        if ($(document).height() - 180 <= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height() - 2180) {
             RequestArticles();
         }
 
         $(window).scroll(function () {
-            if (!inProgress && startFrom < PageCnt && $(window).scrollTop() >= $(document).height() - $(window).height() - 200) {
+            if (!inProgress && startFrom < PageCnt && $(window).scrollTop() >= $(document).height() - $(window).height() - 180) {
                 RequestArticles();
             }
         });

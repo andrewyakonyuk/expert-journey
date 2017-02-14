@@ -88,6 +88,7 @@ namespace NewsWebSite.Controllers
         [HttpGet]
         public ActionResult Index(bool isUserNews = false, bool isInterestingNews = false)
         {
+            //System.Text.RegularExpressions.Regex.Replace()
             var list = new PagedList<DemoArticle>();
             int userId = 0;
             AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
@@ -126,11 +127,16 @@ namespace NewsWebSite.Controllers
 
             if (User.Identity.IsAuthenticated)
             {
+                viewArticle.CurUserName = User.Identity.Name.Split('@')[0];
                 if (article.UserId == User.Identity.GetUserId<int>())
                     viewArticle.Editable = true;
-                viewArticle.UserId = User.Identity.GetUserId<int>();
+                viewArticle.CurUserId = User.Identity.GetUserId<int>();
             }
-            else viewArticle.UserId = 0;
+            else
+            {
+                viewArticle.CurUserName = "";
+                viewArticle.CurUserId = 0;
+            }
             ViewBag.MaxCommentLength = int.Parse(ConfigurationManager.AppSettings["MaxCommentLength"]);
             return View(viewArticle);
 
