@@ -1,43 +1,44 @@
-﻿connectionStarted = true;
+﻿ArticlePage = true;
+
 var hub = $.connection.commentsHub;
 
-
 var Data;
+
 var myId;
 var MaxCommentLength;
 var ArticleId;;
 var MyName;
-
 var commentBlockLoaded = false;
-
 var CommentsBlock;
+var toReset;
+var MyImage;
 
 var noComments = false;
 $(document).ready(function () {
-    CommentsBlock = $('#CommentsBlock')
-
+    CommentsBlock = $('#CommentsBlock');
     Data = $('#articledata');
     myId = $(Data).data('curuserid');
     MaxCommentLength = $(Data).data('maxlen');
     ArticleId = $(Data).data('articleid');
     MyName = $(Data).data('myname');
+    MyImage = $(Data).data('image');
     $.connection.hub.start().done(function () {
         if ($(document).height() - 120 <= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height() - 120) {
+            commentBlockLoaded = true;
             LoadComments();
         }
         $(window).scroll(function () {
             if (!commentBlockLoaded && $(window).scrollTop() >= $(document).height() - $(window).height() - 120) {
+                commentBlockLoaded = true;
                 LoadComments();
             }
         });
         $('#comments').on("click", ".comment .contentComment", function () {
-
             var parent = $(this).parent();
             if (!$(parent).hasClass('green lighten-5')) {
                 $('.comment.green.lighten-5').removeClass('green').removeClass('lighten-5');
             }
             $(parent).toggleClass('green lighten-5');
-            // $(parent).addClass('green').addClass('lighten-5');
         });
     });
 
@@ -54,17 +55,11 @@ $(document).ready(function () {
             var validationMsg = $('#sendBlock').find('.validComment:first');
             $(validationMsg).text(result).show();
             setTimeout(FadeOut, 5000, validationMsg);
-            //Materialize.toast('Invalid input', 2000, 'red');
         }
-
     });
     $('#message').on("click", function () {
         ResetDefaults();
     });
-
-
-
-
     var CommentsBlock = $('#CommentsBlock');
     $(CommentsBlock).on('click', '.buttonsBlock .showSendBlock', function () {
         ResetDefaults();
@@ -72,13 +67,15 @@ $(document).ready(function () {
         var comment = $(buttons).parent();
         //$(comment).find('.contentComment .staticCommentText:first').addClass('hidden');
         //$('.sendBlock.act').addClass('hidden').removeClass('act');
-        $(buttons).find('.hidegroup').addClass('hidden').addClass('dis');
+        $(buttons).find('.hidegroup:not(.hidden)').addClass('hidden').addClass('dis');
         $(comment).find('.buttonsBlock .sendBlock:first').removeClass('hidden').addClass('act');
+        toReset = $(comment);
         // $(this).addClass('hidden');
     });
 
     $(CommentsBlock).on('click', '.buttonsBlock .replyBtn', function () {
         var sendBlock = $(this).parent();
+        toReset = $(sendBlock).parent().parent();
         var id = $(sendBlock).parent().attr('commentid');
         //id = id.replace('send-', '');
         var textArea = $(this).parent().find('.messageTextBox:first');
@@ -86,7 +83,6 @@ $(document).ready(function () {
         var result = ValidateComment(text);
         if (result == "ok") {
             SendComment(id, text)
-            // hub.server.send(ArticleId, id, text);
             $(textArea).val('');
             ResetDefaults();
         }
@@ -102,13 +98,9 @@ $(document).ready(function () {
         $(this).addClass('hidden').addClass('dis');
         var commentsBlock = $(this).parent();
         $(commentsBlock).find('.hidegroup').addClass('hidden').addClass('dis');
-
-
-        //$('#deleteBtn-' + id).addClass('hidden').addClass('dis');
-        // $('#' + id).addClass('hidden').addClass('dis');
         var comment = $(commentsBlock).parent();
+        toReset = $(comment);
         var text = $(comment).find('.contentComment .staticCommentText:first').addClass('hidden').addClass('dis').text();
-        // var text = $('#text-' + id).addClass('hidden').text();
         var edit = $(comment).find('.contentComment .editor:first');
         $(edit).text(text);
         $(edit).removeClass('hidden').addClass('act');
@@ -117,6 +109,7 @@ $(document).ready(function () {
 
     $(CommentsBlock).on('click', '.buttonsBlock .saveButton', function () {
         var comment = $(this).parent().parent();
+        toReset = $(comment);
         var contentComment = $(comment).find('.contentComment:first');
         var id = $(comment).attr('id');
         var value = $(contentComment).find('.commentText.editor:first').val().trim();
@@ -141,47 +134,38 @@ $(document).ready(function () {
     });
 
     $(CommentsBlock).on('click', '.deleteButton', function () {
-        var id = $(this).parent().attr('commentid');
+        var id = $(this).parent().addClass('hidden').attr('commentid');
         hub.server.delete(id);
         ResetDefaults();
     });
-
-
-
 });
 
 
 function LoadComments() {
     $.ajax({
         url: '/News/GetComments',
-        //              timeout: 3000,
         method: 'POST',
         dataType: 'Json',
         async: true,
         data: { "articleId": ArticleId },
         beforeSend: function () {
-            commentBlockLoaded = true;
             $('#loader').removeClass("hidden");
             hub.server.connect(ArticleId);
         }
     }).done(function (data) {
-        //   console.log(data);
         if (data.length > 0) {
             $.each(data, function (index, data) {
-                var templ = TemplateReplace(data.Id, data.UserId, data.UserName, data.Text, data.Created.replace('T', ' '));
+                var templ = TemplateReplace(data.Id, data.UserId, data.UserName, data.Text, data.Created.replace('T', ' '), data.UserImage);
                 if (data.Depth == 0) {
                     $('#comments').prepend(templ);
                 }
                 else {
-
                     $('#' + data.ReplyCommentId).find('.replyBlock:first').prepend(templ);
                 }
                 if (data.Deleted) {
-                    var comment = $('#' + data.Id)
-                    $(comment).find('.buttonsBlock:first').addClass('hidden');
-                    $(comment).find('.contentComment .staticCommentText:first').text('Comment has been deleted');
+                    var comment = $('#' + data.Id);
+                    DeleteItem(comment);
                 }
-                // LoadButtons(data.Id, data.UserId);
             });
         }
 
@@ -201,15 +185,16 @@ hub.client.result = function (commentId, sendId, result, date) {
     console.log(result);
 }
 
-hub.client.addMessage = function (id, userId, name, message, date, reply) {
-    var templ = TemplateReplace(id, userId, name, message, date);
+hub.client.addMessage = function (id, userId, name, message, date, reply, userimage) {
+   // alert('got it!');
+    var templ = TemplateReplace(id, userId, name, message, date, userimage);
+    //console.log("id: " + id + " userid:" + userId + " message: " + message + " date: " + date + " img: " + userimage);
     if (reply == 0) {
         $('#comments').prepend(templ);
     }
     else {
-        $('#reply-' + reply).prepend(templ);
+        $('#' + reply).find('.replyBlock:first').prepend(templ);
     }
-    // LoadButtons(id, userId);
 }
 
 
@@ -221,18 +206,13 @@ hub.client.edit = function (commentId, text, date) {
 }
 hub.client.delete = function (commentId) {
     var comment = $('#' + commentId);
-    var commentcontent = $(comment).find('.contentComment:first');
-    $(commentcontent).find('.staticCommentText:first').text('Comment has been deleted');
-    $(commentcontent).find('.commentName:first').text('');
-    $(comment).find('buttonsBlock:first').addClass('hidden');
-    $(comment).addClass('deleted');
+    DeleteItem(comment);
 }
 
 function SendComment(replyId, text) {
     var sendId = guid();
     hub.server.send(ArticleId, replyId, text, sendId);
-
-    var templ = TemplateReplace(sendId, myId, MyName, text, "", replyId);
+    var templ = TemplateReplace(sendId, myId, MyName, text, "", MyImage);
     templ = $(templ);
     if (replyId == 0) {
         $('#comments').prepend(templ);
@@ -258,9 +238,10 @@ function ValidateComment(text) {
     return "ok";
 }
 
-function TemplateReplace(id, userId, name, message, date) {
+function TemplateReplace(id, userId, name, message, date, image) {
     var templ = $("#template").html();
     templ = templ.split('[Id]').join(id);
+    templ = templ.replace('[Image]', image);
     templ = templ.split('[userId]').join(userId);
     templ = templ.replace('[Name]', htmlEncode(name));
     templ = templ.replace('[Text]', htmlEncode(message));
@@ -275,85 +256,14 @@ function TemplateReplace(id, userId, name, message, date) {
 }
 
 
-
 function ResetDefaults() {
-    $('.editor.act').addClass('hidden').removeClass('act');
-    $('.staticCommentText.hidden').removeClass('hidden');
-    $('.saveButton.act').addClass('hidden').removeClass('act');
-    $('.showSendBlock.hidden').removeClass('hidden');
-    $('.sendBlock.act').addClass('hidden').removeClass('act');
-    $('.editButton.hidden.dis').removeClass('hidden').removeClass('dis');
-    $('.deleteButton.hidden.dis').removeClass('hidden').removeClass('dis');
-    $('.sendBlock.act').addClass('hidden').removeClass('act');
-    $('.showSendBlock.hidden').removeClass('hidden');
+    var block = $(toReset);
+    $(block).find('.editor.act:first').addClass('hidden').removeClass('act');
+    $(block).find('.staticCommentText.hidden:first').removeClass('hidden');
+    $(block).find('.saveButton.act:first').addClass('hidden').removeClass('act');
+    $(block).find('.sendBlock.act:first').addClass('hidden').removeClass('act');
+    $(block).find('.hidegroup.hidden.dis').removeClass('hidden').removeClass('dis');
 }
-
-
-//--------------- Move to document ready
-
-
-//--------------
-
-//function LoadButtons(id, userId) {
-//    $('#' + id).on("click", function () {
-//        ResetDefaults();
-//        var replyBtnId = $(this).attr('id');
-//        var sendBlock = $('.sendBlock.act');
-//        sendBlock.addClass('hidden');
-//        sendBlock.removeClass('act');
-//        $('#sendBlock-' + replyBtnId).addClass('act').removeClass('hidden');
-//        // $('.showSendBlock.hidden').removeClass('hidden');
-//        $(/*'#' + replyBtnId*/this).addClass('hidden');
-//    });
-
-//    $('#send-' + id).on("click", function () {
-//        var id = $(this).attr('id');
-//        id = id.replace('send-', '');
-//        var textArea = $('#message-' + id);
-//        var text = textArea.val().trim();
-//        if (ValidateComment(text)) {
-//            SendComment(id, text)
-
-
-//            hub.server.send(ArticleId, id, text);
-//            $(textArea).val('');
-//            ResetDefaults();
-//        }
-//        else {
-//            Materialize.toast('Invalid input', 2000, 'red');
-//        }
-//    });
-
-//    if (userId == myId) {
-//        $('#editBtn-' + id).on("click", function () {
-//            ResetDefaults();
-//            $(this).addClass('hidden').addClass('dis');
-//            $('#deleteBtn-' + id).addClass('hidden').addClass('dis');
-//            $('#' + id).addClass('hidden').addClass('dis');
-//            var text = $('#text-' + id).addClass('hidden').text();
-//            var edit = $('#edit-' + id);
-//            $(edit).text(text);
-//            $(edit).removeClass('hidden').addClass('act');
-//            $('#SaveBtn-' + id).removeClass('hidden').addClass('act');
-//        });
-
-//        $('#SaveBtn-' + id).on("click", function () {
-//            var value = $('#edit-' + id).val().trim();
-//            if (ValidateComment(value)) {
-//                hub.server.edit(id, value);
-//                ResetDefaults();
-//            }
-//            else {
-//                Materialize.toast('Invalid input', 2000, 'red');
-//            }
-//        });
-
-//        $('#deleteBtn-' + id).on("click", function () {
-//            ResetDefaults();
-//            hub.server.delete(id);
-//        });
-//    }
-//}
 
 function guid() {
     return s4() + s4() + s4();
@@ -369,4 +279,13 @@ function FadeOut(item) {
     $(item).fadeOut(1000, function () {
         $(item).hide();
     });
+}
+
+function DeleteItem(comment)
+{
+    $(comment).find('.buttonsBlock:first').addClass('hidden');
+    var content = $(comment).find('.contentComment:first');
+    $(content).find('.NameImage img:first').addClass('hidden').attr('src', '');
+    $(content).find('.staticCommentText:first').text('Comment has been deleted');
+    $(content).find('.NameImage .commentName:first').text('');
 }

@@ -4,7 +4,7 @@
 @{
     Layout = "~/Views/Shared/Lay.cshtml";
 }
-<article id="articledata" data-curuserid="@Model.CurUserId" data-maxlen="@ViewBag.MaxCommentLength" data-articleid="@Model.Id" data-myname="@Model.CurUserName">
+<article id="articledata" data-curuserid="@Model.CurUserId" data-maxlen="@ViewBag.MaxCommentLength" data-articleid="@Model.Id" data-myname="@Model.CurUserName" data-image="@Model.CurUserImage">
     <div class="row">
         <div class="col s12 m12 l12">
             <div class="card z-depth-1">
@@ -70,7 +70,7 @@
             </div>
         </div>
     </div>
- 
+
 </div>
 
 @section scripts {
@@ -78,25 +78,29 @@
     <script type="text/template" id="template">
         <div class="comment" id="[Id]" userid="[userId]" style="padding-left: 8px; border-left: 1px solid #D3D3D3">
             <div class="contentComment">
-                <h5 class="commentName blue-text" >[Name]</h5>
-                <p class="commentDate blue-grey-text"  style="margin-bottom:10px;">[Date]</p>
-                <p class="commentText staticCommentText" >[Text]</p>
+                <div class="NameImage">
+                    <img src="@Url.Content("~/Content/UserImages")/[Image]" style="width:35px; height: 35px;"/>
+                    <h5 class="commentName blue-text" style="display: inline-block; bottom: 10px;  position: relative;">[Name]</h5>
+                </div>
+               
+                <p class="commentDate blue-grey-text" style="margin-bottom:10px;">[Date]</p>
+                <p class="commentText staticCommentText">[Text]</p>
                 <textarea class="commentText editor hidden white" contenteditable="true"></textarea>
                 <p class="validEdit red-text" style="display: none"></p>
             </div>
-           
+
             @if (Model.CurUserId > 0)
             {
-                <div id="buttons-[Id]"  class="buttonsBlock" commentid="[Id]">
-                    <input type="button" value="Reply" class="showSendBlock hidegroup commentsBtn waves-effect waves-light btn-flat blue-text"  />
-                    <input type="button" value="Edit" class="commentsBtn hidegroup waves-effect waves-light btn-flat blue-text [Class] editButton"  />
-                    <input type="button" value="Save" class="commentsBtn waves-effect waves-light btn-flat blue-text saveButton hidden" />
-                    <input type="button" value="Delete" class="commentsBtn hidegroup waves-effect waves-light btn-flat [Class] blue-text deleteButton"  />
+                <div id="buttons-[Id]" class="buttonsBlock" commentid="[Id]">
+                    <input type="button" value="Reply" class="showSendBlock hidegroup waves-effect waves-light btn-flat blue-text" />
+                    <input type="button" value="Edit" class="hidegroup waves-effect waves-light btn-flat blue-text [Class] editButton" />
+                    <input type="button" value="Save" class="waves-effect waves-light btn-flat blue-text saveButton hidden" />
+                    <input type="button" value="Delete" class="hidegroup waves-effect waves-light btn-flat [Class] blue-text deleteButton" />
                     <div class="sendBlock hidden">
                         <div class="divider"></div>
                         <textarea name="message" class="messageTextBox" id="message-[Id]"></textarea>
                         <p class="validComment red-text" style="display: none"></p>
-                        <input type="button" class="replyBtn commentsBtn waves-effect waves-light btn" value="Send" />
+                        <input type="button" class="replyBtn waves-effect waves-light btn" value="Send" />
                     </div>
                 </div>
             }

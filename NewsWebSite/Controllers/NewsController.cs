@@ -31,7 +31,7 @@ namespace NewsWebSite.Controllers
         readonly NotificationsService notifiCountCache;
         public NewsController(
             IArticleRepository repo,
-            IUserRepository userRepo, 
+            IUserRepository userRepo,
             ITagRepository tagRepo,
             ICommentsRepository commentsRepository,
             INotifiactionsRepository notifiRepo)
@@ -78,7 +78,7 @@ namespace NewsWebSite.Controllers
                 a.FullDescription = a.Title;
                 a.UserId = 11;
                 repo.Save(a);
-                
+
             }
             return Content("ok");
         }
@@ -112,15 +112,17 @@ namespace NewsWebSite.Controllers
         }
 
         [HttpGet]
-        public ActionResult Article(int id = 0, int notifiId = 0)
+        public ActionResult Article(int id = 0, int commentId = -1)
         {
             if (id < 1) return HttpNotFound();
 
-            if (notifiId > 0)
+            if (commentId >= 0)
             {
-                if (notificationRepo.View(User.Identity.GetUserId<int>(), notifiId))
-                    notifiCountCache.Update(User.Identity.GetUserId<int>(), -1);
+                var count = notificationRepo.ViewByContext(User.Identity.GetUserId<int>(), commentId, id);
+                if (count > 0)
+                    notifiCountCache.Update(User.Identity.GetUserId<int>(), -count);
             }
+
             var article = repo.GetItem(id);
             if (article == null) return HttpNotFound();
             var viewArticle = new ArticleForView(article);
@@ -131,9 +133,13 @@ namespace NewsWebSite.Controllers
                 if (article.UserId == User.Identity.GetUserId<int>())
                     viewArticle.Editable = true;
                 viewArticle.CurUserId = User.Identity.GetUserId<int>();
+                var userImage = userRepo.GetUserImage(viewArticle.CurUserId);
+                if (userImage == "Default") viewArticle.CurUserImage = "profile.png";
+                else viewArticle.CurUserImage = viewArticle.CurUserId + "/" + userImage;
             }
             else
             {
+                viewArticle.CurUserImage = "";
                 viewArticle.CurUserName = "";
                 viewArticle.CurUserId = 0;
             }
@@ -204,7 +210,7 @@ namespace NewsWebSite.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult EditArticle(EditArticleModel edited, string[] tags, string imageCondition)
         {
-           
+
             if (!ModelState.IsValid) return View(edited);
             var baseArticle = repo.GetItem(edited.Id);
 

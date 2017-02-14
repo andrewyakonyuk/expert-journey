@@ -17,6 +17,7 @@ namespace NewsWebSite.Models.ViewModel
         public bool Editable { get; set; }
         public int CurUserId { get; set; }
         public string CurUserName { get; set; }
+        public string CurUserImage { get; set; }
 
 
         public ISet<Tag> ArticleTags { get; set; }

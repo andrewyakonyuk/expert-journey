@@ -15,6 +15,12 @@
     display: inline-block;
 }
 
+.NameImage {
+    height: 35px;
+    width: auto;
+    position: relative;
+    display: inline-block;
+}
 .invisible {
     visibility: hidden !important;
 }
