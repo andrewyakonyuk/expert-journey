@@ -1,7 +1,7 @@
 ﻿@using NewsWebSite.Models.Services
 @using Microsoft.AspNet.Identity
 @{
-    var NotifiCnt = NotificationsService.Instance.GetValue(User.Identity.GetUserId<int>());
+    var NotifiCnt = NotificationsCountService.Instance.GetValue(User.Identity.GetUserId<int>());
 }
 <!DOCTYPE html>
 <html lang="en">

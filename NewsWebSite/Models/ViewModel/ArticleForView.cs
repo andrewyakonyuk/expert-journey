@@ -18,6 +18,7 @@ namespace NewsWebSite.Models.ViewModel
         public int CurUserId { get; set; }
         public string CurUserName { get; set; }
         public string CurUserImage { get; set; }
+        public int CommentId { get; set; }
 
 
         public ISet<Tag> ArticleTags { get; set; }

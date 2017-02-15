@@ -28,7 +28,7 @@ namespace NewsWebSite.Controllers
         readonly INotifiactionsRepository notificationRepo;
         readonly ITagRepository tagRepo;
         readonly IUserRepository userRepo;
-        readonly NotificationsService notifiCountCache;
+        readonly NotificationsCountService notifiCountCache;
         public NewsController(
             IArticleRepository repo,
             IUserRepository userRepo,
@@ -37,7 +37,7 @@ namespace NewsWebSite.Controllers
             INotifiactionsRepository notifiRepo)
         {
             notificationRepo = notifiRepo;
-            notifiCountCache = new NotificationsService(notificationRepo);
+            notifiCountCache = new NotificationsCountService(notificationRepo);
             this.userRepo = userRepo;
             this.tagRepo = tagRepo;
             this.repo = repo;
@@ -116,19 +116,24 @@ namespace NewsWebSite.Controllers
         {
             if (id < 1) return HttpNotFound();
 
-            if (commentId >= 0)
-            {
-                var count = notificationRepo.ViewByContext(User.Identity.GetUserId<int>(), commentId, id);
-                if (count > 0)
-                    notifiCountCache.Update(User.Identity.GetUserId<int>(), -count);
-            }
-
             var article = repo.GetItem(id);
             if (article == null) return HttpNotFound();
             var viewArticle = new ArticleForView(article);
 
+           
+
+          
+
             if (User.Identity.IsAuthenticated)
             {
+                if (commentId >= 0)
+                {
+                    var count = notificationRepo.ViewByContext(User.Identity.GetUserId<int>(), commentId, id);
+                    if (count > 0)
+                        notifiCountCache.Update(User.Identity.GetUserId<int>(), -count);
+                    viewArticle.CommentId = commentId;
+                }
+                else viewArticle.CommentId = 0;
                 viewArticle.CurUserName = User.Identity.Name.Split('@')[0];
                 if (article.UserId == User.Identity.GetUserId<int>())
                     viewArticle.Editable = true;

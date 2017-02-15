@@ -20,13 +20,13 @@ namespace NewsWebSite.Hubs
         readonly IUserRepository usersRepository;
         readonly ICommentsRepository commentsRepository;
         readonly INotifiactionsRepository notoficationsRepository;
-        readonly NotificationsService notifiCountCache;
+        readonly NotificationsCountService notifiCountCache;
         readonly CommentsHelper commentsHelper;
 
         public CommentsHub(IArticleRepository articleRepo, IUserRepository usersRepo, ICommentsRepository commentsRepo, INotifiactionsRepository notifyRepo)
         {
             commentsHelper = new CommentsHelper();
-            notifiCountCache = new NotificationsService(notifyRepo);
+            notifiCountCache = new NotificationsCountService(notifyRepo);
             articleRepository = articleRepo;
             usersRepository = usersRepo;
             commentsRepository = commentsRepo;

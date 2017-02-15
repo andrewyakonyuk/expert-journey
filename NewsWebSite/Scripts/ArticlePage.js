@@ -12,17 +12,27 @@ var commentBlockLoaded = false;
 var CommentsBlock;
 var toReset;
 var MyImage;
+var CommentId;
 
 var noComments = false;
 $(document).ready(function () {
     CommentsBlock = $('#CommentsBlock');
     Data = $('#articledata');
+    CommentId = $(Data).data('commentid');
+   // alert(CommentId);
     myId = $(Data).data('curuserid');
     MaxCommentLength = $(Data).data('maxlen');
     ArticleId = $(Data).data('articleid');
     MyName = $(Data).data('myname');
     MyImage = $(Data).data('image');
     $.connection.hub.start().done(function () {
+        if (CommentId > 0) {
+            //$('html, body').animate({
+            //    scrollTop: $('#loaderBlock').offset().top
+            //}, 1);
+            $('body, html').scrollTo('#loaderBlock');
+            console.log('scrollTo loader');
+        }
         if ($(document).height() - 120 <= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height() - 120) {
             commentBlockLoaded = true;
             LoadComments();
@@ -168,9 +178,13 @@ function LoadComments() {
                 }
             });
         }
-
         $('#loaderBlock').addClass("hidden");
         $('#sendBlock').removeClass("hidden");
+        if (CommentId > 0)
+        {
+                $('body, html').scrollTo('#' + CommentId);
+                $('#' + CommentId).toggleClass('green lighten-5');
+        }
     });
 }
 
@@ -262,7 +276,7 @@ function ResetDefaults() {
     $(block).find('.staticCommentText.hidden:first').removeClass('hidden');
     $(block).find('.saveButton.act:first').addClass('hidden').removeClass('act');
     $(block).find('.sendBlock.act:first').addClass('hidden').removeClass('act');
-    $(block).find('.hidegroup.hidden.dis').removeClass('hidden').removeClass('dis');
+    $(block).find('.buttonsBlock:first .hidegroup.hidden.dis').removeClass('hidden').removeClass('dis');
 }
 
 function guid() {

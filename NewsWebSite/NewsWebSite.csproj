@@ -271,13 +271,15 @@
     <Compile Include="Hubs\CommentsHub.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Article.cs" />
+    <Compile Include="Models\ArticleServiceModels\ArticleListLinker.cs" />
     <Compile Include="Models\Comment.cs" />
     <Compile Include="Models\Notification.cs" />
     <Compile Include="Models\NotifiCount.cs" />
     <Compile Include="Models\Repository\Interfaces\INotifiactionsRepository.cs" />
     <Compile Include="Models\Repository\Interfaces\ITagRepository.cs" />
     <Compile Include="Models\Repository\NotificationRepository.cs" />
-    <Compile Include="Models\Services\NotificationsService.cs" />
+    <Compile Include="Models\Services\ArticleService.cs" />
+    <Compile Include="Models\Services\NotificationsCountService.cs" />
     <Compile Include="Models\Repository\TagRepository.cs" />
     <Compile Include="Models\SignalrModels\CommentInfo.cs" />
     <Compile Include="Models\Repository\CommentsRepository.cs" />

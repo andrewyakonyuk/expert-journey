@@ -34,9 +34,11 @@ namespace NewsWebSite.Controllers
             this.repo = repo;
             this.tagRepo = tagRepo;
             this.notifiRepo = notifiRepo;
-            notifiCountCache = new NotificationsService(notifiRepo);
+            notifiCountCache = new NotificationsCountService(notifiRepo);
+
+
         }
-        readonly NotificationsService notifiCountCache;
+        readonly NotificationsCountService notifiCountCache;
         readonly IUserRepository repo;
         readonly ITagRepository tagRepo;
         readonly INotifiactionsRepository notifiRepo;
@@ -65,7 +67,6 @@ namespace NewsWebSite.Controllers
             {
                 return View(model);
             }
-
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
             var user = new AppUser { UserName = model.Email, Password = model.Password };
@@ -301,7 +302,6 @@ namespace NewsWebSite.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 var user = new AppUser { UserName = model.Email };
                 if (model.Image != null)
                 {

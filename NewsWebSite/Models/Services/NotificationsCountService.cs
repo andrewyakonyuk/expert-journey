@@ -8,15 +8,15 @@ using System.Web;
 
 namespace NewsWebSite.Models.Services
 {
-    public class NotificationsService
+    public class NotificationsCountService
     {
 
-        public static NotificationsService Instance
+        public static NotificationsCountService Instance
         {
-            get { return (NotificationsService)NinjectWebCommon.bootstrapper.Kernel.GetService(typeof(NotificationsService)); }
+            get { return (NotificationsCountService)NinjectWebCommon.bootstrapper.Kernel.GetService(typeof(NotificationsCountService)); }
         }
         readonly INotifiactionsRepository notifiRepo;
-        public NotificationsService(INotifiactionsRepository notifiRepo)
+        public NotificationsCountService(INotifiactionsRepository notifiRepo)
         {
             this.notifiRepo = notifiRepo;
         }
@@ -24,7 +24,7 @@ namespace NewsWebSite.Models.Services
         public int GetValue(int id)
         {
             MemoryCache memoryCache = MemoryCache.Default;
-            if (memoryCache.Contains(id.ToString())) return (int)memoryCache.Get(id.ToString());
+            if (memoryCache.Contains("UserNitificationsCount" + id.ToString())) return (int)memoryCache.Get("UserNitificationsCount" + id.ToString());
             var val = notifiRepo.GetLinesCount(id);
             memoryCache.Add(id.ToString(), val, DateTime.Now.AddMinutes(20));
             return val;
@@ -35,11 +35,11 @@ namespace NewsWebSite.Models.Services
             MemoryCache memoryCache = MemoryCache.Default;
             if (!memoryCache.Contains(userId.ToString()))
             {
-                memoryCache.Add(userId.ToString(), value, DateTime.Now.AddMinutes(20));
+                memoryCache.Add("UserNitificationsCount" + userId.ToString(), value, DateTime.Now.AddMinutes(20));
             }
             else
             {
-                memoryCache.Set(userId.ToString(), value, DateTime.Now.AddMinutes(20));
+                memoryCache.Set("UserNitificationsCount" + userId.ToString(), value, DateTime.Now.AddMinutes(20));
             }
         }
 
@@ -55,7 +55,7 @@ namespace NewsWebSite.Models.Services
             MemoryCache memoryCache = MemoryCache.Default;
             if (memoryCache.Contains(id.ToString()))
             {
-                memoryCache.Remove(id.ToString());
+                memoryCache.Remove("UserNitificationsCount" + id.ToString());
             }
         }
     }

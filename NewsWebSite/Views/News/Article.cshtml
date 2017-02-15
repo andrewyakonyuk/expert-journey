@@ -4,7 +4,7 @@
 @{
     Layout = "~/Views/Shared/Lay.cshtml";
 }
-<article id="articledata" data-curuserid="@Model.CurUserId" data-maxlen="@ViewBag.MaxCommentLength" data-articleid="@Model.Id" data-myname="@Model.CurUserName" data-image="@Model.CurUserImage">
+<article id="articledata" data-curuserid="@Model.CurUserId" data-maxlen="@ViewBag.MaxCommentLength" data-articleid="@Model.Id" data-myname="@Model.CurUserName" data-image="@Model.CurUserImage" data-commentid="@Model.CommentId">
     <div class="row">
         <div class="col s12 m12 l12">
             <div class="card z-depth-1">
@@ -91,7 +91,7 @@
 
             @if (Model.CurUserId > 0)
             {
-                <div id="buttons-[Id]" class="buttonsBlock" commentid="[Id]">
+                <div class="buttonsBlock" commentid="[Id]">
                     <input type="button" value="Reply" class="showSendBlock hidegroup waves-effect waves-light btn-flat blue-text" />
                     <input type="button" value="Edit" class="hidegroup waves-effect waves-light btn-flat blue-text [Class] editButton" />
                     <input type="button" value="Save" class="waves-effect waves-light btn-flat blue-text saveButton hidden" />
