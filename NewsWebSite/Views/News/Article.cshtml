@@ -8,9 +8,9 @@
         <div class="col s12 m12 l12">
             <div class="card z-depth-1">
                 <div class="card-image">
-                    @if (Model.Image != "Empty")
+                    @if (Model.Image != null)
                     {
-                        <img src="@Url.Content("~/Content/ArticlImages/" + Model.Id + "/" + Model.Image)" alt="SRC">
+                        <img src="@Url.Content("~/Content/ArticleImages/" + Model.Id + "/" + Model.Image)" alt="SRC">
                     }
                     @if (Model.Editable)
                     {
@@ -25,16 +25,10 @@
                     <br />
                     <p>@Html.Raw(Model.FullDescription)</p><br />
                     <div class="divider"></div><br />
-                    @TagListHelper.DisabledModelTagsList(Model.ArticleTags)
+                    @Html.DisplayFor(model => model.ArticleTags)
                     <div class="divider"></div><br />
-                    @if (Model.UpdateDate != null)
-                    {
-                        <p>@Model.UpdateDate</p>
-                    }
-                    else
-                    {
-                        <p>@Model.CreateDate</p>
-                    }
+                    <p>Создано : @Model.CreateDate.ToString("yyyy-MM-dd H:mm:ss")</p>
+                    <p>Обновлено : @Model.UpdateDate.ToString("yyyy-MM-dd H:mm:ss")</p>
                 </div>
             </div>
         </div>
@@ -42,7 +36,7 @@
 </article>
 
 <div class="commentsBlock">
-    <div id="comments" class="comments white z-depth-1" style="padding:20px;">
+    <div id="comments" data-collapsible="accordion" class="comments white z-depth-1" style="padding:20px;">
         <div id="loaderBlock">
             <div id="loader" class="hidden"></div>
         </div>
@@ -80,7 +74,7 @@
                 </div>
             }
             <div class="divider" style="margin:10px 0"></div>
-        </div>
+            </div>
     </script>
 
     <script>

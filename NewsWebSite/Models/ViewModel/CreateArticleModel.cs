@@ -42,6 +42,7 @@ namespace NewsWebSite.Models.ViewModel
         public HttpPostedFileBase Image { get; set; }
 
         [Display(Name ="Теги статьи")]
+        [UIHint("TagList")]
         public IEnumerable<Tag> AllTags { get; set; }
     }
 }

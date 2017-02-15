@@ -10,11 +10,11 @@
             {
                 <div class="col l6 m6 s12 grid-item">
                     <div class="card hoverable" style="padding:5px;">
-                        @if (article.Image != "Empty")
+                        @if (article.Image != null)
                         {
                             <div class="card-image waves-effect waves-block waves-light">
                                 <a id="Title-@article.Id" href="@Url.Action("Article", new { Title = article.Title, Id = article.Id })">
-                                    <img class="activator" src="@Url.Content("~/Content/ArticlImages/")@article.Id/@article.Image" style="max-height:250px; min-height:250px; object-fit:cover; object-position:center">
+                                    <img class="activator" src="@Url.Content("~/Content/ArticleImages/")@article.Id/@article.Image" style="object-fit:cover; object-position:center">
                                 </a>
                             </div>
                         }
@@ -27,12 +27,15 @@
                         <div class="card-content">
                             <span class="card-title activator grey-text text-darken-4 truncate"><i class="material-icons right">more_vert</i>@article.Title</span>
                             <p><a href="@Url.Action("Article", new { Title = article.Title, Id = article.Id })" id="More-@article.Id">Подробнее</a></p>
+                            <div class="divider" style="margin:10px 0;"></div>
+                            <abbr class="timeago tooltipped blue-grey-text" style="font-weight:bold; height:30px;" data-position="bottom" data-delay="50" data-tooltip="@article.LastUpdateDate.ToString("yyyy-MM-dd H:mm:ss")"></abbr>
                         </div>
                         <div class="card-reveal">
-                            <span class="card-title grey-text text-darken-4 truncate" >@article.Title<i class="material-icons right">close</i></span>
+                            <span class="card-title grey-text text-darken-4 truncate">@article.Title<i class="material-icons right">close</i></span>
                             <p>@article.ShortDescription</p>
-                            <div class="divider"></div>
-                            <p title="@article.CreateDate">@article.LastUpdateDate.ToString("yyyy-MM-dd H:mm:ss")</p>
+                            <div class="divider" style="margin:10px 0px;"></div>
+                            <p>Создано : @article.CreateDate.ToString("yyyy-MM-dd H:mm:ss")</p>
+                            <p>Обновлено : @article.LastUpdateDate.ToString("yyyy-MM-dd H:mm:ss")</p>
                         </div>
                     </div>
                 </div>
@@ -43,39 +46,46 @@
         </div>
     </div>
 </articlelist>
-
 @section scripts {
-    @Scripts.Render("~/Scripts/masonry.pkgd.min.js")
+   
+    <script>
+        $(document).ready(function () {
+            $("abbr.timeago").timeago();
+            $('.tooltipped').tooltip({ delay: 50 });
+        });
+    </script>
+@Scripts.Render("~/Scripts/masonry.pkgd.min.js")
     @Scripts.Render("~/bundles/newsList")
- 
+    @Scripts.Render("~/Scripts/timeago.js")
+    @Scripts.Render("~/Scripts/timegoRU.js")
     <script type="text/template" id="imageTempl">
         <div class="card-image waves-effect waves-block waves-light">
             <a id="Title-[Id]" href="@Url.Action("Article")/[Id]">
-                <img class="activator" src="@Url.Content("~/Content/ArticlImages")/[Id]/[Image]" style="max-height:250px;min-height:250px; object-fit:cover; object-position:center">
+                <img class="activator" src="@Url.Content("~/Content/ArticlImages")/[Id]/[Image]" style="object-fit:cover; object-position:center">
             </a>
         </div>
     </script>
-
     <script type="text/template" id="placeholderTemplate">
         <a id="Title-[Id]" href="@Url.Action("Article")/[Id]">
             <div class="placeholder"></div>
         </a>
     </script>
-
     <script type="text/template" id="template">
         <div class="col l6 m6 s12 grid-item">
-            <div class="card hoverable" style="padding:5px;">
+            <div class="card hoverable" style="padding:5px;margin:0.5rem 0rem 1rem 0rem;">
                 [ImagePlaceholder]
-
                 <div class="card-content">
                     <span class="card-title activator grey-text text-darken-4 truncate">[Title]<i class="material-icons right">more_vert</i></span>
                     <p><a href="@Url.Action("Article")/[Id]" id="More-[Id]">Подробнее</a></p>
+                    <div class="divider" style="margin:10px 0;"></div>
+                    <abbr class="timeago tooltipped blue-grey-text" style="font-weight:bold;display:inline-block; height:30px" data-position="bottom" data-delay="50" data-tooltip="[UpdateDate]" ></abbr>
                 </div>
                 <div class="card-reveal">
                     <span class="card-title grey-text text-darken-4 truncate">[Title]<i class="material-icons right">close</i></span>
                     <p>[ShortDescription]</p>
-                    <div class="divider"></div>
-                    <p>[Date]</p>
+                    <div class="divider" style="margin:10px 0px;"></div>
+                    <p>Создано : [Date]</p>
+                    <p>Обновлено : [UpdateDate]</p>
                 </div>
             </div>
         </div>

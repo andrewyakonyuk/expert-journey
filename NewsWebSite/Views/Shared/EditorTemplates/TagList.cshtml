@@ -1,0 +1,12 @@
+﻿@using NewsWebSite.Models
+@model IEnumerable<Tag>
+
+<select name="tags" multiple="multiple" style="width:100%">
+    @if (Model != null)
+    {
+        foreach (Tag tag in Model)
+        {
+            <option value="@tag.TagText">@tag.TagText</option>
+        }
+    }
+</select>

@@ -107,6 +107,34 @@ namespace NewsWebSite.Controllers
         }
 
         [HttpGet]
+        public ActionResult ChangeImage()
+        {
+            AppUser currenrUser = repo.GetById(User.Identity.GetUserId<int>());
+            EditUserImageModel editImage = new EditUserImageModel { ImageName = currenrUser.Image, Id=currenrUser.Id };
+            return View(editImage);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public ActionResult ChangeImage(EditUserImageModel editImage)
+        {
+            if(!ModelState.IsValid)
+            {
+                return View(editImage);
+            }
+            AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
+            if (editImage.Image != null)
+            {
+                currentUser.Image = editImage.Image.FileName;
+                FileHelper fileHelper = new FileHelper();
+                fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), editImage.Image, currentUser.Id);
+            }
+            else currentUser.Image = null;
+            repo.Save(currentUser);
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
         public ActionResult EditTags()
         {
             AppUser currentUser = repo.GetById(User.Identity.GetUserId<int>());
@@ -302,20 +330,14 @@ namespace NewsWebSite.Controllers
                 if (model.Image != null)
                 {
                     user.Image = Path.GetFileName(model.Image.FileName);
+                    FileHelper fileHelper = new FileHelper();
+                    fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), model.Image, user.Id);
                 }
-                else
-                {
-                    user.Image = "Default";
-                }
+                else user.Image = null;
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                    if (user.Image != "Default")
-                    {
-                        FileHelper fileHelper = new FileHelper();
-                        fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["UserImagesFolder"]), model.Image, user.Id);
-                    }
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);

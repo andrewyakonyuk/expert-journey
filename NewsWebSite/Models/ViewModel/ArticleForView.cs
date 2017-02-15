@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
@@ -17,6 +18,7 @@ namespace NewsWebSite.Models.ViewModel
         public bool Editable { get; set; }
         public int UserId { get; set; }
 
+        [UIHint("TagList")]
         public ISet<Tag> ArticleTags { get; set; }
 
         public ArticleForView(Article a)

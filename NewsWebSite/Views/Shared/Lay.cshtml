@@ -36,16 +36,16 @@
     <ul id="dropdown1" class="dropdown-content">
         <li><a href="@Url.Action("Index", "Account")">Профиль</a></li>
         <li><a href="@Url.Action("CreateArticle", "News")">Создать новость</a></li>
-        <li><a href="@Url.Action("Index", "News", new { isInterestingNews = true })">Интерестные новости</a></li>
-        <li><a href="@Url.Action("Index", "News", new { isUserNews = true })">Мои новости</a></li>
+        <li><a href="@Url.RouteUrl("InterestingNews")">Интерестные новости</a></li>
+        <li><a href="@Url.RouteUrl("MyNews")">Мои новости</a></li>
         <li class="divider"></li>
         <li><a href="@Url.Action("LogOff", "Account")">Выйти</a></li>
     </ul>
     <ul id="dropdown2" class="dropdown-content">
         <li><a href="@Url.Action("Index", "Account")">Профиль</a></li>
         <li><a href="@Url.Action("CreateArticle", "News")">Создать новость</a></li>
-        <li><a href="@Url.Action("Index", "News", new { isInterestingNews = true })">Интерестные новости</a></li>
-        <li><a href="@Url.Action("Index", "News", new { isUserNews = true })">Мои новости</a></li>
+        <li><a href="@Url.RouteUrl("InterestingNews")">Интерестные новости</a></li>
+        <li><a href="@Url.RouteUrl("MyNews")">Мои новости</a></li>
         <li class="divider"></li>
         <li><a href="@Url.Action("LogOff", "Account")">Выйти</a></li>
     </ul>
@@ -54,7 +54,7 @@
             <a href="@Url.Action("Index", "News")" class="brand-logo">NewsPortal</a>
             <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
             <ul class="right hide-on-med-and-down">
-                <li><a href="@Url.Action("Index", "News")">Главная</a></li>
+                <li><a href="@Url.RouteUrl("AllNews")">Главная</a></li>
                 @if (User.Identity.IsAuthenticated)
                 {
                     <li><a href="@Url.Action("Notifications", "Account")">Мои Ответы(<span class="nCnt">@NotifiCnt</span>)</a></li>

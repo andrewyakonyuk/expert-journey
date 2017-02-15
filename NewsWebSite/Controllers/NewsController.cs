@@ -98,7 +98,12 @@ namespace NewsWebSite.Controllers
             }
             else
             {
-                list = repo.GetArticleByTags(currentUser.Tags, new ArticleCriteria() { StartFrom = 0, UserId = 0, Count = NumberOfItemsOnPage, LastId = 0 });
+                list = repo.GetArticleByTags(currentUser.Tags, new ArticleCriteria() {
+                    StartFrom = 0,
+                    UserId = 0,
+                    Count = NumberOfItemsOnPage,
+                    LastId = 0
+                });
             }
             var model = new ArticleListModel();
 
@@ -164,12 +169,12 @@ namespace NewsWebSite.Controllers
             {
                 newArticle.Image = article.Image.FileName;
             }
-            else newArticle.Image = "Empty";
+            else newArticle.Image = null;
             newArticle.Tags.Clear();
             IEnumerable<Tag> articleTags = TagsHelper.CreateTagList(tags, tagRepo);
             TagsHelper.SetTagForModel(newArticle, articleTags);
             var id = repo.Save(newArticle);
-            if (newArticle.Image != "Empty")
+            if (newArticle.Image != null)
             {
                 FileHelper fileHelper = new FileHelper();
                 fileHelper.SaveFIle(Server.MapPath(ConfigurationManager.AppSettings["ArticleImagesFolder"]), article.Image, id);
@@ -207,7 +212,7 @@ namespace NewsWebSite.Controllers
             var changesExist = false;
             if (imageCondition == "Empty")
             {
-                baseArticle.Image = "Empty";
+                baseArticle.Image = null;
                 changesExist = true;
             }
 

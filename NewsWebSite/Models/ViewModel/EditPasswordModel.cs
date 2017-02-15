@@ -10,19 +10,19 @@ namespace NewsWebSite.Models.ViewModel
     {
         [Required]
         [DataType(DataType.Password)]
-        [Display(Name = "OldPassword")]
+        [Display(Name = "Текущий пароль")]
         public string OldPassword { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "{0} должен содержать больше {2} символов", MinimumLength = 6)]
         [DataType(DataType.Password)]
-        [Display(Name = "NewPassword")]
+        [Display(Name = "Новый пароль")]
         public string NewPassword { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm NewPassword")]
-        [Compare("NewPassword", ErrorMessage = "The password and confirmation password do not match.")]
+        [Display(Name = "Подтверждение пароля")]
+        [Compare("NewPassword", ErrorMessage = "Введенный пароль должен совпадать с новым!")]
         public string ConfirmNewPassword { get; set; }
 
     }

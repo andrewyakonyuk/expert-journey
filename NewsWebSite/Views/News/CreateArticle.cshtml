@@ -43,7 +43,7 @@
             <div class="row">
                 <div class="input-field col s12">
                     <p>Тэги:</p>
-                    @TagListHelper.TagsList(Model.AllTags)
+                    @Html.EditorFor(model => model.AllTags)
                     @Html.ValidationMessage("tags")
                 </div>
             </div>

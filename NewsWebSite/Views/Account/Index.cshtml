@@ -8,7 +8,7 @@
         <h2 class="header">@Model.UserName.Split('@')[0]</h2>
         <div class="card horizontal">
             <div class="card-image">
-                @if (Model.ImageName != "Default")
+                @if (Model.ImageName != null)
                 {
                     <img src="@Url.Content("~/Content/UserImages/" + Model.Id + "/" + Model.ImageName)" style="max-width:200px;max-height:200px">
                 }
@@ -21,10 +21,11 @@
                 <div class="card-content">
                     <p><a href="@Url.Action("EditEmail", "Account")">Сменить Email</a></p>
                     <p><a href="@Url.Action("EditPassword", "Account")">Сменить пароль</a></p>
+                    <p><a href="@Url.Action("ChangeImage", "Account")">Сменить изображение</a></p>
                     <p><a href="@Url.Action("EditTags", "Account")">Редактировать тэги</a></p>
                 </div>
                 <div class="card-action">
-                    @TagListHelper.DisabledModelTagsList(Model.UserTags)
+                    @Html.DisplayFor(model => model.UserTags)
                 </div>
             </div>
         </div>

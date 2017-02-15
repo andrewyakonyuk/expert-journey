@@ -1,0 +1,13 @@
+﻿@using NewsWebSite.Models
+@model ISet<Tag>
+
+<select name="tags" multiple="multiple" style="width:100%" disabled>
+    @if (Model != null)
+    {
+        foreach (Tag tag in Model)
+        {
+            <option value="@tag.TagText" selected>@tag.TagText</option>
+        }
+    }
+</select>
+

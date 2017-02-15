@@ -34,8 +34,9 @@ function RequestArticles() {
                 var templ = ($("#template").html().split("[Id]").join(data.Id));
                 templ = templ.split("[Title]").join(data.Title);
                 templ = templ.replace('[ShortDescription]', data.ShortDescription);
-                templ = templ.split("[Date]").join(data.CreateDate.replace("T", " "));
-                if (data.Image != 'Empty') {
+                templ = templ.split('[Date]').join(data.CreateDate.replace("T", " "));
+                templ = templ.split('[UpdateDate]').join(data.LastUpdateDate.replace("T", " "));
+                if (data.Image != null) {
                     var image = $('#imageTempl').html();
                     image = image.split('[Id]').join(data.Id);
                     image = image.split('[Image]').join(data.Image);
@@ -47,11 +48,15 @@ function RequestArticles() {
                     templ = templ.replace('[ImagePlaceholder]', placeholder);
                 }
                 var templ = $(templ);
+                var grid = $('#grid');
                 $('#grid').append(templ).masonry('appended', templ);
+                $(templ).find("abbr.timeago").timeago();
+                $(templ).find('.tooltipped').tooltip({ delay: 50 });
             });
+            setTimeout(SetTime, 200);
+            setTimeout(CallAdaptive, 300);
             LastId = data[data.length - 1].Id;
         }
-
         $(loader).addClass('hidden');
         startFrom++;
         if (startFrom == PageCnt) {
@@ -74,10 +79,14 @@ function CallAdaptive() {
     });
 
 }
+function SetTime() {
+    $("abbr.timeago").timeago();
+    $('.tooltipped').tooltip({ delay: 50 });
+}
 
 $(document).ready(function () {
-    //console.log("body: " + $(document).height());
-    //console.log("window: " + $(window).height());
+    //$("abbr.timeago").timeago();
+    //$('.tooltipped').tooltip({ delay: 50 });
     CallAdaptive();
     if (startFrom < PageCnt) {
         if ($(document).height() - 200 <= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height() - 200) {
