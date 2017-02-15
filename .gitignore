@@ -24,6 +24,8 @@ bld/
 UserImages/
 ArticlImages/
 NewsWebSite1/
+new/
+copy/
 
 # Visual Studio 2015 cache/options directory
 .vs/

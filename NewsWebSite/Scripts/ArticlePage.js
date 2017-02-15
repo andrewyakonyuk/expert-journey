@@ -27,11 +27,8 @@ $(document).ready(function () {
     MyImage = $(Data).data('image');
     $.connection.hub.start().done(function () {
         if (CommentId > 0) {
-            //$('html, body').animate({
-            //    scrollTop: $('#loaderBlock').offset().top
-            //}, 1);
             $('body, html').scrollTo('#loaderBlock');
-            console.log('scrollTo loader');
+            //console.log('scrollTo loader');
         }
         if ($(document).height() - 120 <= $(window).height() || $(window).scrollTop() >= $(document).height() - $(window).height() - 120) {
             commentBlockLoaded = true;
@@ -75,12 +72,9 @@ $(document).ready(function () {
         ResetDefaults();
         var buttons = $(this).parent();
         var comment = $(buttons).parent();
-        //$(comment).find('.contentComment .staticCommentText:first').addClass('hidden');
-        //$('.sendBlock.act').addClass('hidden').removeClass('act');
         $(buttons).find('.hidegroup:not(.hidden)').addClass('hidden').addClass('dis');
         $(comment).find('.buttonsBlock .sendBlock:first').removeClass('hidden').addClass('act');
         toReset = $(comment);
-        // $(this).addClass('hidden');
     });
 
     $(CommentsBlock).on('click', '.buttonsBlock .replyBtn', function () {
